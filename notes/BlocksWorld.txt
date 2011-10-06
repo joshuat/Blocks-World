@@ -1,10 +1,36 @@
-Fluents
+############## Fluents #############################
+holding(robot, block, s)
+	Robot is holding block in situation s.
 
+onTop(x, y, s)
+	x is on top of y in situation s.
 
-Actions
+############## Actions #############################
+pickUp(robot, block)
+	robot picks up block
 
+putDown(robot, block, y)
+	robot puts down block on y.
 
-Preconditions
+############## Effect Axioms #######################
+holding(robot, block, do(pickup(robot, block)))
 
+onTop(x, y, do(putDown(_, x, y)))
 
-Successor State Axioms
+############## Preconditions #######################
+Poss(pickUp(robot, block), s) =
+	(all r holding(r, block, s)) and
+	(all b holding(robot, b, s))
+
+Poss(putDown(robot, block, y), s) =
+	holding(robot, block, s) and
+	not(all x onTop(x, y, s))
+
+############## Successor State Axioms ##############
+holding(robot, block, do(a, s)) =
+	{holding(robot, block, s) and a!=putDown(robot, block, _)} or
+	{a=pickUp(robot, block)}
+
+onTop(x, y, do(a, s)) =
+	{onTop(x, y, s) and a!=pickUp(_, x)} or
+	{a=putDown(_, x, y)}
