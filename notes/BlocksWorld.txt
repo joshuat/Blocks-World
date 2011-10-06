@@ -1,0 +1,10 @@
+Fluents
+
+
+Actions
+
+
+Preconditions
+
+
+Successor State Axioms
