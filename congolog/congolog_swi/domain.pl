@@ -20,9 +20,9 @@
 %%
 %%  This predicate is true when Rob is the name of a robot in the world.
 %%
-robot(Robot1).
-%robot(Robot2). Let's start with just one robot.
-%robot(Robot3).
+robot(robot1).
+%robot(robot2). Let's start with just one robot.
+%robot(robot3).
 
 
 %%
