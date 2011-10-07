@@ -40,12 +40,13 @@ agent(Robot1).
 prim_obj(Obj) :-
     prim_obj(Obj,_).
 
-prim_obj(Obj,block) :-
-    member(Obj,[block1,block2,block3]).
-prim_obj(Obj,robot) :-
-    member(Obj,[robot1,robot2,robot3]).
-prim_obj(Obj,stack) :-
-    member(Obj,[stack1,stack2,stack3]).
+% I don't think I need these.
+%prim_obj(Obj,block) :-
+%    member(Obj,[block1,block2,block3]).
+%prim_obj(Obj,robot) :-
+%    member(Obj,[robot1,robot2,robot3]).
+%prim_obj(Obj,stack) :-
+%    member(Obj,[stack1,stack2,stack3]).
 
 
 %%
@@ -130,120 +131,30 @@ poss(put_down(Robot, Block, Place),S) :-
 ********************************************************************
 
 %%
-%%  has_object(Agt,Obj,S):  agent has an object
+%%  holding(Robot,Block,S): robot is holding the block
 %%
-%%  This fluent is true when agent Agt has possession of the object Obj
-%%  in situation S.  It can become true by acquiring the object, and
-%%  false by releasing the object or if it has become used.
+%%  This fluent is true when the robot is holding the block in
+%%  situation S. It becomes true if the robot picks up the block
+%%  and becomes false if the robot puts the block down.
 %%
-has_object(Agt,Obj,do(A,S)) :-
-    A = acquire_object(Agt,Obj)
-    ;
-    has_object(Agt,Obj,S),
-    \+ (
-       A = release_object(Agt,Obj)
-       ;
-       used(Obj,do(A,S))
-    ).
+holding(Robot,Block,do(A,S)) :-
+    A = pick_up(Robot,Block)
+	;
+	holding(Robot,Block,S),
+	\+ (a=put_down(Robot,Block,_)).
 
 %%
-%%  used(Obj,S):  object is used in situation S
+%%  on_top(Block,Y,S): block is on top of y
 %%
-%%  This fluent is true when an object has been used - for example,
-%%  an ingredient has been placed in a container.  Once an object has
-%%  been used, it cannot be used again.
+%%  This fluent is true when the block is on top of y in
+%%  situation S. It becomes true when the block is put on
+%%  top of y and it becomes false if the block is picked up.
 %%
-used(Obj,do(A,S)) :-
-    prim_obj(Obj), obj_is_type(Obj,ingredient),
-    (
-      used(Obj,S)
-      ;
-      A  = place_in(_,Obj,_)
-    ).
-
-
-%%
-%%  contents(Obj,Conts,S):  object contents in a situation
-%%
-%%  This fluent indicates that object Obj contains the contents Conts
-%%  in situation S.  It can become true, become false, and change value
-%%  in a variety of ways, each of which is documented with its
-%%  implementation.
-%%
-contents(Obj,Conts,do(A,S)) :-
-    ((
-      %% --- All the ways it can become true
-      %% It was previously empty, and contents were placed or transfered in
-      (A = place_in(_,Conts,Obj)
-         ; A = transfer(_,Obj2,Obj), contents(Obj2,Conts,S)),
-      \+ contents(Obj,_,S)
-      ;
-      %% It previously had contents, and more contents were placed or
-      %% transfered in.  Contents is then a list.
-      (A = place_in(_,NewConts,Obj)
-         ; A = transfer(_,Obj2,Obj), contents(Obj2,NewConts,S)),
-      contents(Obj,OldConts,S),
-      ( OldConts = [_|_] -> OldContsL = OldConts ; OldContsL = [OldConts]),
-      ( NewConts = [_|_] -> NewContsL = NewConts ; NewContsL = [NewConts]),
-      union(OldContsL,NewContsL,Conts)
-      ;
-      %% An agent mixed the contents.  If they were previously
-      %% unmixed, they are encased in a mixed(conts) indicator.
-      A = mix(_,Obj), contents(Obj,OldConts,S),
-      (  OldConts = mixed(MixConts) ->
-             Conts = mixed(MixConts)
-         ;
-             Conts = mixed(OldConts)
-      )
-      ;
-      %% An agent chopped the contents.
-      A = chop(_,Obj), contents(Obj,OldConts,S),
-      Conts = chopped(OldConts)
-      ;
-      %% If the container is in an oven, its contents are baking.
-      %% If they are not encapsulated in a baking() indicator then do so.
-      \+ obj_is_type(Obj,oven), obj_is_type(Oven,oven),
-      contents(Oven,Obj,do(A,S)), contents(Obj,OldConts,S),
-      (  OldConts = baking(BakedConts) ->
-             Conts = baking(BakedConts)
-         ;
-             Conts = baking(OldConts)
-      )
-      ;
-      %% If the container was taken out of the oven, update to baked()
-      \+ obj_is_type(Obj,oven), obj_is_type(Oven,oven),
-      contents(Oven,Obj,S), A = transfer(_,Oven,_),
-      contents(Obj,baking(BakedConts),S),
-      Conts = baked(BakedConts)
-    )
-    ;
-    %% Or it was true, and didnt become false...
-    contents(Obj,Conts,S), \+ (
-        %% --- All the ways it can become false
-        %% The contents were transfered out
-        A = transfer(_,Obj,_)
-        ;
-        %% New contents were transfered in
-        A = transfer(_,Obj2,Obj), contents(Obj2,_,S)
-        ;
-        %% New contents were placed in
-        A = place_in(_,_,Obj)
-        ;
-        %% The contents were mixed
-        A = mix(_,Obj)
-        ;
-        %% The contents were chopped
-        A = chop(_,Obj)
-        ;
-        %% The object is in an oven, hence will change
-        \+ obj_is_type(Obj,oven), obj_is_type(Oven,oven),
-        contents(Oven,Obj,do(A,S))
-        ;
-        %% The object was just taken out of an oven, hence will change
-        \+ obj_is_type(Obj,oven), obj_is_type(Oven,oven),
-        contents(Oven,Obj,S), A = transfer(_,Oven,_)
-    )).
-
+on_top(Block,Y,do(A,S)) :=
+    A = put_down(_,Block,Y)
+	;
+	on_top(Block,Y,S),
+	\+ (a=pick_up(_,Block)).
 
 %%
 %%  history_length(N,S):  length of the action histoy in a situation
