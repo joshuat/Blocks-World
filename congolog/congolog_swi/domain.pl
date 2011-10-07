@@ -25,6 +25,25 @@ robot(robot1).
 %robot(robot3).
 
 
+%%  
+%%  block(Block):  specify blocks in the system
+%%
+%%  This predicate is true when Block is the name of a block in the world.
+%%
+block(block1).
+block(block2).
+block(block3).
+
+
+%%  
+%%  stack(Stack):  specify locations where blocks can be stacked in
+%%  the system
+%%
+%%  This predicate is true when Stack is the name of a stack in the world.
+%%
+stack(stack1).
+
+
 %%
 %%  prim_obj(Obj,Type):  specify primitive objects in the world
 %%
