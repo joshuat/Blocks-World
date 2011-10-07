@@ -145,16 +145,15 @@ poss(put_down(Robot, Block, Place),S) :-
 %%        )
 %%
 
-********************************************************************
-*********************** I'M UP TO HERE!!!!!!!!! ********************
-********************************************************************
+
 
 %%
 %%  holding(Robot,Block,S): robot is holding the block
 %%
-%%  This fluent is true when the robot is holding the block in
-%%  situation S. It becomes true if the robot picks up the block
-%%  and becomes false if the robot puts the block down.
+%%  This fluent is true when the robot is holding the
+%%  block in situation S. It becomes true if the robot
+%%  picks up the block and it becomes false if the robot
+%%  puts the block down.
 %%
 holding(Robot,Block,do(A,S)) :-
     A = pick_up(Robot,Block)
@@ -169,8 +168,8 @@ holding(Robot,Block,do(A,S)) :-
 %%  situation S. It becomes true when the block is put on
 %%  top of y and it becomes false if the block is picked up.
 %%
-on_top(Block,Y,do(A,S)) :=
-    A = put_down(_,Block,Y)
+on_top(Block,Y,do(A,S)) :-
+    A=put_down(_,Block,Y)
 	;
 	on_top(Block,Y,S),
 	\+ (a=pick_up(_,Block)).
