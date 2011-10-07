@@ -145,8 +145,6 @@ poss(put_down(Robot, Block, Place),S) :-
 %%        )
 %%
 
-
-
 %%
 %%  holding(Robot,Block,S): robot is holding the block
 %%
