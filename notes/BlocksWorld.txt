@@ -19,12 +19,12 @@ onTop(x, y, do(putDown(_, x, y)))
 
 ############## Preconditions #######################
 Poss(pickUp(robot, block), s) =
-	(all r holding(r, block, s)) and
-	(all b holding(robot, b, s))
+	not(all r holding(r, block, s)) and
+	not(all b holding(robot, b, s))
 
 Poss(putDown(robot, block, y), s) =
 	holding(robot, block, s) and
-	not(all x onTop(x, y, s))
+	not(all x onTop(_, y, s))
 
 ############## Successor State Axioms ##############
 holding(robot, block, do(a, s)) =

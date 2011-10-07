@@ -1,12 +1,13 @@
 %%
-%%  domain.pl:  Axiomatisation of the "Cooking Agents" domain for ConGolog
+%%  blocksdomain.pl:  Axiomatisation of the "Blocks World" domain for ConGolog
 %%
-%%  Author:  Ryan Kelly (rfk)
+%%  Author:  Joshua Torrance (joshuat)
 %%
-%%  Date Created:  12/03/07
+%%  Date Created:  06/10/11
 %%
-%%    This file contains an axiomatisation of the "Cooking Agents" domain
-%%    in the situation calculus.
+%%    This file will contain an axiomatisation of the "Blocks World" domain
+%%    in the situation calculus. This file has been adapted from Ryan Kelly's
+%%    Cooking Agents domain.
 %%
 %%    The domain consists of several agents and inanimate objects of
 %%    different types (indicated by prim_object/2) which in turn may
@@ -15,13 +16,13 @@
 
 
 %%  
-%%  agent(Agt):  specify agents in the system
+%%  robot(Rob):  specify robots (agents) in the system
 %%
-%%  This predicate is true when Agt is the name of an agent in the world.
+%%  This predicate is true when Rob is the name of a robot in the world.
 %%
-agent(thomas).
-agent(richard).
-agent(harriet).
+agent(Robot1).
+%agent(Robot2). Let's start with just one robot.
+%agent(Robot3).
 
 
 %%
@@ -39,26 +40,13 @@ agent(harriet).
 prim_obj(Obj) :-
     prim_obj(Obj,_).
 
-prim_obj(Obj,knife) :-
-    member(Obj,[knife1,knife2,knife3]).
-prim_obj(Obj,bowl) :-
-    member(Obj,[bowl1,bowl2]).
-prim_obj(Obj,board) :-
-    member(Obj,[board1,board2]).
-prim_obj(Obj,oven) :-
-    member(Obj,[oven1]).
-prim_obj(Obj,flour) :-     % flour measured in 'units' for simplicity
-    member(Obj,[flour1,flour2]).
-prim_obj(Obj,sugar) :-     % same for the sugar
-    member(Obj,[sugar1,sugar2]).
-prim_obj(Obj,egg) :-
-    member(Obj,[egg1,egg2,egg3]).
-prim_obj(Obj,tomato) :-
-    member(Obj,[tomato1,tomato2]).
-prim_obj(Obj,lettuce) :-
-    member(Obj,[lettuce1]).
-prim_obj(Obj,carrot) :-
-    member(Obj,[carrot1,carrot2,carrot3]).
+% I don't think I need these.
+%prim_obj(Obj,block) :-
+%    member(Obj,[block1,block2,block3]).
+%prim_obj(Obj,robot) :-
+%    member(Obj,[robot1,robot2,robot3]).
+%prim_obj(Obj,stack) :-
+%    member(Obj,[stack1,stack2,stack3]).
 
 
 %%
@@ -67,10 +55,11 @@ prim_obj(Obj,carrot) :-
 %%  This predicate is true when all objects of type SubType are
 %%  also of type SuperType.
 %%  
-super_type(Type,container) :-
-    member(Type,[bowl,board,oven]).
-super_type(Type,ingredient) :-
-    member(Type,[flour,egg,tomato,lettuce,sugar]).
+% No super types yet
+%super_type(Type,container) :-
+%    member(Type,[bowl,board,oven]).
+%super_type(Type,ingredient) :-
+%    member(Type,[flour,egg,tomato,lettuce,sugar]).
 
 %%
 %%  obj_is_type(Obj,Type):  check object types
@@ -93,23 +82,13 @@ obj_is_type(Obj,Type) :-
 %%  calculus for further information.
 %%
 
-%%  acquire_object(Agt,Obj):  agent acquires control of an object
-prim_action(acquire_object(Agt,Obj)) :-
-    agent(Agt), prim_obj(Obj).
+%%  pick_up(Robot,Block): Robot picks up a block.
+prim_action(pick_up(Robot,Block)) :-
+    robot(Robot), block(Block).
 
-%%  release_object(Agt,Obj):  agent releases an object it has acquired
-prim_action(release_object(Agt,Obj)) :-
-    agent(Agt), prim_obj(Obj).
-
-%%  place_in(Agt,Conts,Dest):  agent places object Conts in container Dest
-prim_action(place_in(Agt,Conts,Dest)) :-
-    agent(Agt), prim_obj(Conts), obj_is_type(Dest,container).
-
-%%  transfer(Agt,Source,Dest):  agent transfers contents of container Source
-%%  to container Dest
-prim_action(transfer(Agt,Source,Dest)) :-
-    agent(Agt), obj_is_type(Source,container),
-    obj_is_type(Dest,container).
+%%  put_down(Robot,Block,Place):  Robot puts Block on Place.
+prim_action(put_down(Robot,Block,Place)) :-
+    robot(Robot), block(Block), (block(Place) ; stack(Place)).
 
 
 %%
@@ -119,40 +98,24 @@ prim_action(transfer(Agt,Source,Dest)) :-
 %%  A in situation S.
 %%
 
-%%  Agents can only acquire an object if no agent already has it,
-%%  and the object hasnt been used.
-poss(acquire_object(_,Obj),S) :-
-    \+ has_object(_,Obj,S), \+ used(Obj,S).
+%%  Robots can only pick up a block if no robot is holding
+%%  that block and if that robot is not holding a block.
+poss(pick_up(Robot,Block),S) :-
+    \+ holding(_,Block,S), \+ holding(Robot,_,S).
 
-%%  Agents may only release objects that they have.
-poss(release_object(Agt,Obj),S) :-
-    has_object(Agt,Obj,S).
+%%  Robots can only put blocks on top of blocks/stacks that
+%%  don't have something on top of them already and if they're
+%%  holding that block.
+poss(put_down(Robot, Block, Place),S) :-
+    holding(Robot, Block, S), \+ onTop(_, Place, S).
 
-%%  Agents may place an object in a container provided they have possession
-%%  of both.
-poss(place_in(Agt,Conts,Dest),S) :-
-    has_object(Agt,Conts,S), has_object(Agt,Dest,S).
-
-%%  Agents may transfer contents from one container to another as long
-%%  as they have possession of both.
-poss(transfer(Agt,Source,Dest),S) :-
-    has_object(Agt,Source,S), has_object(Agt,Dest,S).
-
-%%  Agents may mix the contains of a container they have possession of.
-poss(mix(Agt,Cont),S) :-
-    has_object(Agt,Cont,S).
-
-%%  Agents may chop the contents of a contanier they have in their
-%%  posession, as long as they have a knife.
-poss(chop(Agt,Obj),S) :-
-    has_object(Agt,Obj,S), obj_is_type(K,knife), has_object(Agt,K,S).
 
 %%
 %%  Fluents in the Domain
 %%
 %%  The fluents are specified in terms of their successor state axioms,
 %%  of the form "a fluent is true if it became true, or was previously
-%%  true did not become false".
+%%  true and did not become false".
 %%
 %%    fluent_holds(Args,do(A,S)) :-
 %%        fluent_becomes_true(Args,do(A,S))
@@ -163,121 +126,35 @@ poss(chop(Agt,Obj),S) :-
 %%        )
 %%
 
-%%
-%%  has_object(Agt,Obj,S):  agent has an object
-%%
-%%  This fluent is true when agent Agt has possession of the object Obj
-%%  in situation S.  It can become true by acquiring the object, and
-%%  false by releasing the object or if it has become used.
-%%
-has_object(Agt,Obj,do(A,S)) :-
-    A = acquire_object(Agt,Obj)
-    ;
-    has_object(Agt,Obj,S),
-    \+ (
-       A = release_object(Agt,Obj)
-       ;
-       used(Obj,do(A,S))
-    ).
+********************************************************************
+*********************** I'M UP TO HERE!!!!!!!!! ********************
+********************************************************************
 
 %%
-%%  used(Obj,S):  object is used in situation S
+%%  holding(Robot,Block,S): robot is holding the block
 %%
-%%  This fluent is true when an object has been used - for example,
-%%  an ingredient has been placed in a container.  Once an object has
-%%  been used, it cannot be used again.
+%%  This fluent is true when the robot is holding the block in
+%%  situation S. It becomes true if the robot picks up the block
+%%  and becomes false if the robot puts the block down.
 %%
-used(Obj,do(A,S)) :-
-    prim_obj(Obj), obj_is_type(Obj,ingredient),
-    (
-      used(Obj,S)
-      ;
-      A  = place_in(_,Obj,_)
-    ).
-
+holding(Robot,Block,do(A,S)) :-
+    A = pick_up(Robot,Block)
+	;
+	holding(Robot,Block,S),
+	\+ (a=put_down(Robot,Block,_)).
 
 %%
-%%  contents(Obj,Conts,S):  object contents in a situation
+%%  on_top(Block,Y,S): block is on top of y
 %%
-%%  This fluent indicates that object Obj contains the contents Conts
-%%  in situation S.  It can become true, become false, and change value
-%%  in a variety of ways, each of which is documented with its
-%%  implementation.
+%%  This fluent is true when the block is on top of y in
+%%  situation S. It becomes true when the block is put on
+%%  top of y and it becomes false if the block is picked up.
 %%
-contents(Obj,Conts,do(A,S)) :-
-    ((
-      %% --- All the ways it can become true
-      %% It was previously empty, and contents were placed or transfered in
-      (A = place_in(_,Conts,Obj)
-         ; A = transfer(_,Obj2,Obj), contents(Obj2,Conts,S)),
-      \+ contents(Obj,_,S)
-      ;
-      %% It previously had contents, and more contents were placed or
-      %% transfered in.  Contents is then a list.
-      (A = place_in(_,NewConts,Obj)
-         ; A = transfer(_,Obj2,Obj), contents(Obj2,NewConts,S)),
-      contents(Obj,OldConts,S),
-      ( OldConts = [_|_] -> OldContsL = OldConts ; OldContsL = [OldConts]),
-      ( NewConts = [_|_] -> NewContsL = NewConts ; NewContsL = [NewConts]),
-      union(OldContsL,NewContsL,Conts)
-      ;
-      %% An agent mixed the contents.  If they were previously
-      %% unmixed, they are encased in a mixed(conts) indicator.
-      A = mix(_,Obj), contents(Obj,OldConts,S),
-      (  OldConts = mixed(MixConts) ->
-             Conts = mixed(MixConts)
-         ;
-             Conts = mixed(OldConts)
-      )
-      ;
-      %% An agent chopped the contents.
-      A = chop(_,Obj), contents(Obj,OldConts,S),
-      Conts = chopped(OldConts)
-      ;
-      %% If the container is in an oven, its contents are baking.
-      %% If they are not encapsulated in a baking() indicator then do so.
-      \+ obj_is_type(Obj,oven), obj_is_type(Oven,oven),
-      contents(Oven,Obj,do(A,S)), contents(Obj,OldConts,S),
-      (  OldConts = baking(BakedConts) ->
-             Conts = baking(BakedConts)
-         ;
-             Conts = baking(OldConts)
-      )
-      ;
-      %% If the container was taken out of the oven, update to baked()
-      \+ obj_is_type(Obj,oven), obj_is_type(Oven,oven),
-      contents(Oven,Obj,S), A = transfer(_,Oven,_),
-      contents(Obj,baking(BakedConts),S),
-      Conts = baked(BakedConts)
-    )
-    ;
-    %% Or it was true, and didnt become false...
-    contents(Obj,Conts,S), \+ (
-        %% --- All the ways it can become false
-        %% The contents were transfered out
-        A = transfer(_,Obj,_)
-        ;
-        %% New contents were transfered in
-        A = transfer(_,Obj2,Obj), contents(Obj2,_,S)
-        ;
-        %% New contents were placed in
-        A = place_in(_,_,Obj)
-        ;
-        %% The contents were mixed
-        A = mix(_,Obj)
-        ;
-        %% The contents were chopped
-        A = chop(_,Obj)
-        ;
-        %% The object is in an oven, hence will change
-        \+ obj_is_type(Obj,oven), obj_is_type(Oven,oven),
-        contents(Oven,Obj,do(A,S))
-        ;
-        %% The object was just taken out of an oven, hence will change
-        \+ obj_is_type(Obj,oven), obj_is_type(Oven,oven),
-        contents(Oven,Obj,S), A = transfer(_,Oven,_)
-    )).
-
+on_top(Block,Y,do(A,S)) :=
+    A = put_down(_,Block,Y)
+	;
+	on_top(Block,Y,S),
+	\+ (a=pick_up(_,Block)).
 
 %%
 %%  history_length(N,S):  length of the action histoy in a situation
