@@ -34,3 +34,6 @@ holding(robot, block, do(a, s)) =
 onTop(x, y, do(a, s)) =
 	{onTop(x, y, s) and a!=pickUp(_, x)} or
 	{a=putDown(_, x, y)}
+
+############## Procedures #########################
+proc 

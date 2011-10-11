@@ -21,8 +21,14 @@
 %%  This predicate is true when Rob is the name of a robot in the world.
 %%
 robot(robot1).
-%robot(robot2). Let's start with just one robot.
-%robot(robot3).
+robot(robot2).
+robot(robot3).
+
+%%
+%%  robots are agents
+%%
+agent(Robot) :-
+	robot(Robot).
 
 
 %%  
@@ -126,7 +132,10 @@ poss(pick_up(Robot,Block),S) :-
 %%  don't have something on top of them already and if they're
 %%  holding that block.
 poss(put_down(Robot, Block, Place),S) :-
-    holding(Robot, Block, S), \+ onTop(_, Place, S).
+    Block \= Place,
+	holding(Robot, Block, S),
+	\+ on_top(_, Place, S),
+	robot(Robot), block(Block), block(Place) ; stack(Place).
 
 
 %%

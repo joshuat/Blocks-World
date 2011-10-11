@@ -75,3 +75,13 @@ precedes_eq(S1,S2) :-
 %%
 
 
+%%
+%%  legal(S):    legality of a situation
+%%
+%%  The predicate legal/3 must be true if the situation S is composed
+%%  of legal actions. Actions are legal if they are possible in the
+%%  given situation.
+legal(s0).
+
+legal(do(A, S)) :-
+    poss(A, S), legal(S).
