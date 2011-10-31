@@ -25,7 +25,7 @@ robot(robot2).
 robot(robot3).
 
 %%
-%%  robots are agents
+%%  Robots are agents.
 %%
 agent(Robot) :-
 	robot(Robot).
@@ -42,60 +42,9 @@ block(block3).
 
 
 %%  
-%%  stack(Stack):  specify locations where blocks can be stacked in
-%%  the system
+%%  floor(Floor): specifies the floor
 %%
-%%  This predicate is true when Stack is the name of a stack in the world.
-%%
-stack(stack1).
-
-
-%%
-%%  prim_obj(Obj,Type):  specify primitive objects in the world
-%%
-%%  This predicate is true when Obj is the name of a primitive object
-%%  in the world, of type Type.
-%%
-%%  prim_obj(Obj):  shortcut to check object names
-%%
-%%  This predicate is true if Obj is the name of a primite object,
-%%  regardless of its type.
-%%
-
-prim_obj(Obj) :-
-    prim_obj(Obj,_).
-
-% I don't think I need these.
-%prim_obj(Obj,block) :-
-%    member(Obj,[block1,block2,block3]).
-%prim_obj(Obj,robot) :-
-%    member(Obj,[robot1,robot2,robot3]).
-%prim_obj(Obj,stack) :-
-%    member(Obj,[stack1,stack2,stack3]).
-
-
-%%
-%%  super_type(SubType,SuperType):  specify type hierarchy
-%%
-%%  This predicate is true when all objects of type SubType are
-%%  also of type SuperType.
-%%  
-% No super types yet
-%super_type(Type,container) :-
-%    member(Type,[bowl,board,oven]).
-%super_type(Type,ingredient) :-
-%    member(Type,[flour,egg,tomato,lettuce,sugar]).
-
-%%
-%%  obj_is_type(Obj,Type):  check object types
-%%
-%%  This predicate is true when the object named Obj is of type
-%%  Type according to the hierarchy of super-types.
-%%
-obj_is_type(Obj,Type) :-
-    prim_obj(Obj,Type)
-    ;
-    super_type(SubType,Type), obj_is_type(Obj,SubType).
+floor(floor1).
 
 
 %%
@@ -112,8 +61,9 @@ prim_action(pick_up(Robot,Block)) :-
     robot(Robot), block(Block).
 
 %%  put_down(Robot,Block,Place):  Robot puts Block on Place.
-put_down(Robot,Block,Place) :-
-    robot(Robot), block(Block), (block(Place) ; stack(Place)).
+prim_action(put_down(Robot,Block,Place)) :-
+    robot(Robot), block(Block), ( block(Place) ; floor(Place) ).
+
 
 
 %%
@@ -128,14 +78,13 @@ put_down(Robot,Block,Place) :-
 poss(pick_up(Robot,Block),S) :-
     \+ holding(_,Block,S), \+ holding(Robot,_,S).
 
-%%  Robots can only put blocks on top of blocks/stacks that
+%%  Robots can only put blocks on top of blocks that
 %%  don't have something on top of them already and if they're
-%%  holding that block.
+%%  holding that block. Blocks can also be placed on the gound.
 poss(put_down(Robot, Block, Place),S) :-
     Block \= Place,
 	holding(Robot, Block, S),
-	\+ on_top(_, Place, S),
-	robot(Robot), block(Block), block(Place) ; stack(Place).
+	\+ on_top(_, Place, S).
 
 
 %%
@@ -182,6 +131,19 @@ on_top(Block,Y,do(A,S)) :-
 	\+ (a=pick_up(_,Block)).
 
 %%
+%% on_floor(Block, S): block is on the floor
+%%
+%% The fluent is true when the block is on the floor in
+%% situation S. It becomes true if the block is put on the
+%% floor and it becomes false when the block is picked up.
+%%
+on_floor(Block, do(A,S)) :-
+    A=put_down(_, Block, floor1)
+    ;
+    on_floor(Block, S),
+    \+ (a=pick_up(_,Block)).
+
+%%
 %%  history_length(N,S):  length of the action histoy in a situation
 %%
 %%  This simple fluent encodes in N the number of actions that have
@@ -202,5 +164,6 @@ history_length(0,s0).
 %%  there arent many clauses here.
 %%
 
-% initially, nothing is true...
-
+on_floor(block1).
+on_floor(block2).
+on_floor(block3).
