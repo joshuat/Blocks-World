@@ -36,7 +36,7 @@
 :- include(congolog).
 :- include(sitcalc).
 :- include(domain).
-%:- include(program).
+:- include(program).
 
 
 %%

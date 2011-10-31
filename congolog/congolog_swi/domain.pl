@@ -112,7 +112,7 @@ prim_action(pick_up(Robot,Block)) :-
     robot(Robot), block(Block).
 
 %%  put_down(Robot,Block,Place):  Robot puts Block on Place.
-prim_action(put_down(Robot,Block,Place)) :-
+put_down(Robot,Block,Place) :-
     robot(Robot), block(Block), (block(Place) ; stack(Place)).
 
 
