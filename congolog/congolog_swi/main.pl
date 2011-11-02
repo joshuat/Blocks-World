@@ -18,22 +18,13 @@
 %%    'control'.
 %%
 
-:- discontiguous trans/4, final/2, prim_action/1, natural/1, poss/3,
-                 conflicts/3, start/2.
-
-%%
-%%  Provide Syntactic operators for ConGolog programs
-%%
-:- op(660,xfy,/).  % Nondeterministic choice
-:- op(650,xfy,:).  % Sequence
-:- op(640,xfy,//). % Concurrent execution
-:- op(640,xfy,>>). % Prioritised concurrency
-:- op(620,fx,?).   % Test
+%:- discontiguous trans/4, final/2, prim_action/1, natural/1, poss/3,
+%                 conflicts/3, start/2.
 
 %%
 %%  Include the relevant definitions
 %%
-:- include(congolog).
+:- include(utility).
 :- include(sitcalc).
 :- include(domain).
 :- include(program).

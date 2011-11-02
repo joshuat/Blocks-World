@@ -22,8 +22,9 @@
 %%
 robot(robot1).
 robot(robot2).
-robot(robot3).
+%robot(robot3).
 
+agent_list([robot1, robot2]).
 %%
 %%  Robots are agents.
 %%
@@ -38,32 +39,36 @@ agent(Robot) :-
 %%
 block(block1).
 block(block2).
-block(block3).
+%block(block3).
 
 
 %%  
 %%  floor(Floor): specifies the floor
 %%
-floor(floor1).
+floor(floor).
 
 
 %%
-%%  prim_action(Act):  specify primitive actions
+%%  primitive_action(Act):  specify primitive actions
 %%
 %%  This predicate is true when Act is the name of a primitive action
 %%  in the world.  Actions are typically parameterised in terms of the
-%%  objects they act on.  See the details of the ConGolog situation
-%%  calculus for further information.
+%%  objects they act on.
+
 %%
+%%  The following below the "no-op" action.  As the action as no effect,
+%%  successor state axioms are not necessary.
+%%
+primitive_action(noop(A)) :-
+    agent(A).
 
 %%  pick_up(Robot,Block): Robot picks up a block.
-prim_action(pick_up(Robot,Block)) :-
+primitive_action(pick_up(Robot,Block)) :-
     robot(Robot), block(Block).
 
 %%  put_down(Robot,Block,Place):  Robot puts Block on Place.
-prim_action(put_down(Robot,Block,Place)) :-
+primitive_action(put_down(Robot,Block,Place)) :-
     robot(Robot), block(Block), ( block(Place) ; floor(Place) ).
-
 
 
 %%
@@ -84,7 +89,27 @@ poss(pick_up(Robot,Block),S) :-
 poss(put_down(Robot, Block, Place),S) :-
     Block \= Place,
 	holding(Robot, Block, S),
-	\+ on_top(_, Place, S).
+	(
+		\+ on_top(_, Place, S),
+		block(Place)
+		;
+		floor(Place)
+	).
+
+%%  It is always possible to do nothing.
+poss(noop(Robot), _) :-
+	robot(Robot).
+
+%%
+%%  Similar actions.
+%%
+%%  With multiple agents we need to prevent them from performing
+%%  the same actions at the same time. This is done by defining
+%%  similar_action/3.
+%%
+similar_action(pick_up(_, Block), pick_up(_, Block)).
+similar_action(put_down(_, Block, _), put_down(_, Block, _)).
+similar_action(put_down(_, BlockA, BlockB), put_down(_, BlockB, BlockA)).
 
 
 %%
@@ -115,45 +140,22 @@ holding(Robot,Block,do(A,S)) :-
     A = pick_up(Robot,Block)
 	;
 	holding(Robot,Block,S),
-	\+ (a=put_down(Robot,Block,_)).
+	\+ (A=put_down(Robot,Block,_)).
+
 
 %%
-%%  on_top(Block,Y,S): block is on top of y
+%%  on_top(Block,Y,S): block is on top of Y
 %%
-%%  This fluent is true when the block is on top of y in
+%%  This fluent is true when the block is on top of Y in
 %%  situation S. It becomes true when the block is put on
-%%  top of y and it becomes false if the block is picked up.
+%%  top of Y and it becomes false if the block is picked up.
 %%
 on_top(Block,Y,do(A,S)) :-
     A=put_down(_,Block,Y)
 	;
 	on_top(Block,Y,S),
-	\+ (a=pick_up(_,Block)).
+	\+ (A=pick_up(_,Block)).
 
-%%
-%% on_floor(Block, S): block is on the floor
-%%
-%% The fluent is true when the block is on the floor in
-%% situation S. It becomes true if the block is put on the
-%% floor and it becomes false when the block is picked up.
-%%
-on_floor(Block, do(A,S)) :-
-    A=put_down(_, Block, floor1)
-    ;
-    on_floor(Block, S),
-    \+ (a=pick_up(_,Block)).
-
-%%
-%%  history_length(N,S):  length of the action histoy in a situation
-%%
-%%  This simple fluent encodes in N the number of actions that have
-%%  taken place in the history of situation S.  It is used to make this
-%%  information easily available to agents.
-%%
-history_length(N,do(_,S)) :-
-    history_length(N1,S),
-    N is N1 + 1.
-history_length(0,s0).
 
 %%
 %%  Intial Conditions for the domain
@@ -164,6 +166,6 @@ history_length(0,s0).
 %%  there arent many clauses here.
 %%
 
-on_floor(block1).
-on_floor(block2).
-on_floor(block3).
+on_top(block1, floor, s0).
+on_top(block2, floor, s0).
+on_top(block3, floor, s0).
