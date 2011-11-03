@@ -3,7 +3,7 @@ goal(S) :-
 
 	
 stack(S) :-
-	stack(S, 3).
+	stack(S, 4).
 
 stack(S, Limit) :-
 	stack2(S, 0, Limit).

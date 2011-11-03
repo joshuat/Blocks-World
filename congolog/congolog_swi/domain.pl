@@ -21,10 +21,10 @@
 %%  This predicate is true when Rob is the name of a robot in the world.
 %%
 robot(robot1).
-robot(robot2).
+%robot(robot2).
 %robot(robot3).
 
-agent_list([robot1, robot2]).
+agent_list([robot1]).
 %%
 %%  Robots are agents.
 %%
@@ -62,14 +62,21 @@ floor(floor).
 primitive_action(noop(A)) :-
     agent(A).
 
-%%  pick_up(Robot,Block): Robot picks up a block.
-primitive_action(pick_up(Robot,Block)) :-
+%% grab(Robot,Block): Robot grabs a block.
+primitive_action(grab(Robot,Block)) :-
+	robot(Robot), block(Block).
+
+%% let_go(Robot,Block): Robot lets go of a grabbed block.
+primitive_action(let_go(Robot,Block)) :-
+	robot(Robot), block(Block).
+
+%%  lift(Robot,Block): Robot lifts up a grabbed block.
+primitive_action(lift(Robot,Block)) :-
     robot(Robot), block(Block).
 
 %%  put_down(Robot,Block,Place):  Robot puts Block on Place.
 primitive_action(put_down(Robot,Block,Place)) :-
     robot(Robot), block(Block), ( block(Place) ; floor(Place) ).
-
 
 %%
 %%  poss(A,S):  possibility of performing an action
@@ -78,19 +85,31 @@ primitive_action(put_down(Robot,Block,Place)) :-
 %%  A in situation S.
 %%
 
-%%  Robots can only pick up a block if no robot is holding
-%%  that block and if that robot is not holding a block.
-poss(pick_up(Robot,Block),S) :-
-    \+ holding(_,Block,S), \+ holding(Robot,_,S).
+%%  Robots can only grab one block at a time.
+%%  At the moment only one robot can grab a block at a time.
+poss(grab(Robot,Block),S) :-
+	\+ holding(Robot,_,S), \+ holding(_,Block,S).
+
+%%  Robots can only let go of blocks they are holding and only if
+%%  the block is not being lifted.
+poss(let_go(Robot,Block),S) :-
+	holding(Robot,Block,S), \+ lifted(Block,S).
+
+%%  Robots can only lift up a block if they are holding that
+%%  block and it hasn't already been lifted.
+poss(lift(Robot,Block),S) :-
+    holding(Robot,Block,S), \+ lifted(Block,S).
 
 %%  Robots can only put blocks on top of blocks that
 %%  don't have something on top of them already and if they're
-%%  holding that block. Blocks can also be placed on the gound.
-poss(put_down(Robot, Block, Place),S) :-
+%%  holding that block and it has been lifted. Blocks can also
+%%  be placed on the floor.
+poss(put_down(Robot,Block,Place),S) :-
     Block \= Place,
-	holding(Robot, Block, S),
+	lifted(Block,S),
+	holding(Robot,Block,S),
 	(
-		\+ on_top(_, Place, S),
+		\+ on_top(_,Place,S),
 		block(Place)
 		;
 		floor(Place)
@@ -107,7 +126,7 @@ poss(noop(Robot), _) :-
 %%  the same actions at the same time. This is done by defining
 %%  similar_action/3.
 %%
-similar_action(pick_up(_, Block), pick_up(_, Block)).
+similar_action(lift(_, Block), lift(_, Block)).
 similar_action(put_down(_, Block, _), put_down(_, Block, _)).
 similar_action(put_down(_, BlockA, BlockB), put_down(_, BlockB, BlockA)).
 
@@ -116,8 +135,9 @@ similar_action(put_down(_, BlockA, BlockB), put_down(_, BlockB, BlockA)).
 %%  Fluents in the Domain
 %%
 %%  The fluents are specified in terms of their successor state axioms,
-%%  of the form "a fluent is true if it became true, or was previously
-%%  true and did not become false".
+%%  of the form :
+%%  	A fluent is true if it became true, or was previously true and
+%%  	did not become false.
 %%
 %%    fluent_holds(Args,do(A,S)) :-
 %%        fluent_becomes_true(Args,do(A,S))
@@ -131,16 +151,28 @@ similar_action(put_down(_, BlockA, BlockB), put_down(_, BlockB, BlockA)).
 %%
 %%  holding(Robot,Block,S): robot is holding the block
 %%
-%%  This fluent is true when the robot is holding the
-%%  block in situation S. It becomes true if the robot
-%%  picks up the block and it becomes false if the robot
-%%  puts the block down.
-%%
+%%  This fluent is true when a robot is holding the block.
+%%  It becomes true if it is grabbed and it becomes false if
+%%  it is let go.
 holding(Robot,Block,do(A,S)) :-
-    A = pick_up(Robot,Block)
+	A = grab(Robot,Block)
 	;
 	holding(Robot,Block,S),
-	\+ (A=put_down(Robot,Block,_)).
+	\+ (A=let_go(Robot,Block)).
+
+
+%%
+%%  lifted(Block,S): robots have lifted the block up
+%%
+%%  This fluent is true when robots have lifted the
+%%  block in situation S. It becomes true if it is lifted and
+%%  it becomes false if it is put down.
+%%
+lifted(Block,do(A,S)) :-
+    A = lift(_,Block)
+	;
+	lifted(Block,S),
+	\+ (A=put_down(_,Block,_)).
 
 
 %%
@@ -154,11 +186,11 @@ on_top(Block,Y,do(A,S)) :-
     A=put_down(_,Block,Y)
 	;
 	on_top(Block,Y,S),
-	\+ (A=pick_up(_,Block)).
+	\+ (A=lift(_,Block)).
 
 
 %%
-%%  Intial Conditions for the domain
+%%  Initial Conditions for the domain
 %%
 %%  The initial conditions are specified by additional clauses for
 %%  each fluent, with the situation term set to the atom s0.  For
