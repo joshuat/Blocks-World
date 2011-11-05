@@ -1,6 +1,10 @@
 goal(S) :-
     on_top(block1, block2, S).
 
+dynamic_goal(S) :-
+	block_list(BList), length(BList,BListLen),
+	WORK IN PROGRESS!!
+	
 	
 stack :-
 	stack(_, 3).

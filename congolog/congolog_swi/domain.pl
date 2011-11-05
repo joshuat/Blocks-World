@@ -33,6 +33,14 @@ strength(robot2, 1).
 strength(robot3, 1).
 
 
+%%
+%%  height(Robot, Height): specify the maximum height (in blocks)
+%%  						that a robot can stack
+%%
+height(robot1, 2).
+height(robot2, 1).
+height(robot3, 2).
+
 agent_list([robot1,robot2,robot3]).
 %%
 %%  Robots are agents.
@@ -50,11 +58,13 @@ block(block1).
 block(block2).
 %block(block3).
 
+block_list([block1,block2]).
+
 
 %%
 %%  weight(Block, Weight): specify the weight of each block
 %%
-weight(block1, 3).
+weight(block1, 2).
 weight(block2, 1).
 
 
@@ -119,12 +129,14 @@ poss(lift(Robot,Block),S) :-
 %%  Robots can only put blocks on top of blocks that
 %%  don't have something on top of them already and aren't lifted,
 %%  if they're holding that block and it has been lifted.
+%%  Blocks cannot be placed above a robot's max height.
 %%  Blocks can also be placed on the floor.
 poss(put_down(Robot,Block,Place),S) :-
     Block \= Place,
 	lifted(Block,S),
 	holding(Robot,Block,S),
 	\+ lifted(Place,S),
+	height(Place, BH, S), height(Robot, RH), RH > BH,
 	(
 		\+ on_top(_,Place,S),
 		block(Place)
@@ -274,3 +286,16 @@ total_lift_strength(Block,[A|As],Strength) :-
 all_noop([]).
 all_noop([noop(_)|As]) :-
 	all_noop(As).
+
+	
+%%
+%%  height(Block, Height, S): gives the height of a block
+%%
+%%  eg. A block on the floor will have a height of 1.
+%%      A block on that block will have a height of 2.
+height(floor,0,_).
+height(Block,Height,S) :-
+	block(Block),
+	on_top(Block,Base,S),
+	height(Base,BaseHeight,S),
+	Height is BaseHeight+1.
