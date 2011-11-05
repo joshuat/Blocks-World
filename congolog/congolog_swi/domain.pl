@@ -21,10 +21,19 @@
 %%  This predicate is true when Rob is the name of a robot in the world.
 %%
 robot(robot1).
-%robot(robot2).
-%robot(robot3).
+robot(robot2).
+robot(robot3).
 
-agent_list([robot1]).
+
+%%
+%%  strength(Robot, Strength): specify the strength of each robot
+%%
+strength(robot1, 1).
+strength(robot2, 1).
+strength(robot3, 1).
+
+
+agent_list([robot1,robot2,robot3]).
 %%
 %%  Robots are agents.
 %%
@@ -40,6 +49,13 @@ agent(Robot) :-
 block(block1).
 block(block2).
 %block(block3).
+
+
+%%
+%%  weight(Block, Weight): specify the weight of each block
+%%
+weight(block1, 3).
+weight(block2, 1).
 
 
 %%  
@@ -86,9 +102,8 @@ primitive_action(put_down(Robot,Block,Place)) :-
 %%
 
 %%  Robots can only grab one block at a time.
-%%  At the moment only one robot can grab a block at a time.
-poss(grab(Robot,Block),S) :-
-	\+ holding(Robot,_,S), \+ holding(_,Block,S).
+poss(grab(Robot,_),S) :-
+	\+ holding(Robot,_,S).
 
 %%  Robots can only let go of blocks they are holding and only if
 %%  the block is not being lifted.
@@ -96,18 +111,20 @@ poss(let_go(Robot,Block),S) :-
 	holding(Robot,Block,S), \+ lifted(Block,S).
 
 %%  Robots can only lift up a block if they are holding that
-%%  block and it hasn't already been lifted.
+%%  block.
+%%  Strength and weight are handled in the simultaneous action rules.
 poss(lift(Robot,Block),S) :-
-    holding(Robot,Block,S), \+ lifted(Block,S).
+    holding(Robot,Block,S), \+lifted(Block,S).
 
 %%  Robots can only put blocks on top of blocks that
-%%  don't have something on top of them already and if they're
-%%  holding that block and it has been lifted. Blocks can also
-%%  be placed on the floor.
+%%  don't have something on top of them already and aren't lifted,
+%%  if they're holding that block and it has been lifted.
+%%  Blocks can also be placed on the floor.
 poss(put_down(Robot,Block,Place),S) :-
     Block \= Place,
 	lifted(Block,S),
 	holding(Robot,Block,S),
+	\+ lifted(Place,S),
 	(
 		\+ on_top(_,Place,S),
 		block(Place)
@@ -116,19 +133,50 @@ poss(put_down(Robot,Block,Place),S) :-
 	).
 
 %%  It is always possible to do nothing.
-poss(noop(Robot), _) :-
-	robot(Robot).
+%%  Caveat: To reduce uninteresting permutations
+%%  		it is not possible to do nothing while holding a block.
+poss(noop(Robot), S) :-
+	robot(Robot), \+holding(Robot,_,S).
 
 %%
-%%  Similar actions.
+%%  Simultaneous action rules.
+%%  simultaneous_action(GroupAction, S)
 %%
-%%  With multiple agents we need to prevent them from performing
-%%  the same actions at the same time. This is done by defining
-%%  similar_action/3.
+%%  With multiple agents we need to prevent some actions from
+%%  occurring at the same time. Actions defined by simultaneous_action
+%%  are NOT allowed.
 %%
-similar_action(lift(_, Block), lift(_, Block)).
-similar_action(put_down(_, Block, _), put_down(_, Block, _)).
-similar_action(put_down(_, BlockA, BlockB), put_down(_, BlockB, BlockA)).
+%%  Robots must be strong enough to lift blocks.
+simultaneous_action(Actions,_) :-
+	member(A,Actions), A=lift(_,Block),
+	total_lift_strength(Block,Actions,St),
+	weight(Block,Weight),
+	St < Weight.		% Remember it's negated.
+%%  All robots holding a block must put it down together.
+simultaneous_action(Actions,S) :-
+	member(A,Actions), A=put_down(RobotA,Block,_),
+	holding(RobotB,Block,S), RobotB\=RobotA,
+	member(B,Actions), actor(B,RobotB), B\=put_down(RobotB,Block,_).
+%%  All robots putting a block down must put it in the same place.
+simultaneous_action(Actions,_) :-
+	member(A,Actions), A=put_down(_,Block,PlaceA),
+	member(B,Actions), B=put_down(_,Block,PlaceB),
+	PlaceA\=PlaceB.
+%%  Cannot put A on B and B on A at the same time.
+simultaneous_action(Actions,_) :-
+	member(A,Actions), A=put_down(_,BlockA,BlockB),
+	member(B,Actions), B=put_down(_,BlockB,BlockA).
+%%  Robots cannot put blocks down on blocks that are being lifted.
+simultaneous_action(Actions,_) :-
+	member(A,Actions), A=put_down(_,_,Place),
+	member(B,Actions), B=lift(_,Place).
+%%  Robots cannot lift a block and put it down at the same time.
+simultaneous_action(Actions,_) :-
+	member(A,Actions), A=put_down(_,Block,_),
+	member(B,Actions), B=lift(_,Block).
+%%  In an effort to clean up let's not allow all actions to be noop.
+simultaneous_action(Actions,_) :-
+	all_noop(Actions).
 
 
 %%
@@ -201,3 +249,28 @@ on_top(Block,Y,do(A,S)) :-
 on_top(block1, floor, s0).
 on_top(block2, floor, s0).
 on_top(block3, floor, s0).
+
+
+%%
+%%  Domain related utility predicates.
+%%
+
+%%
+%%  total_lift_strength(Block,Actions,Strength): Gives the total strength lifting
+%%  	Block in Actions.
+%%
+total_lift_strength(_,[],0).
+total_lift_strength(Block,[lift(Robot,Block)|As],Strength) :-
+	total_lift_strength(Block,As,St),
+	strength(Robot,RobotStrength),
+	Strength is St + RobotStrength.
+total_lift_strength(Block,[A|As],Strength) :-
+	\+(A=lift(_,Block)),
+	total_lift_strength(Block,As,Strength).
+	
+%%
+%%  all_noop(GroupAction): all the actions are noop(_)
+%%
+all_noop([]).
+all_noop([noop(_)|As]) :-
+	all_noop(As).

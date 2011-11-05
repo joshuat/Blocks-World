@@ -63,6 +63,18 @@ precedes_eq(S1,S2) :-
 
 
 %%
+%%  simultaneous_actions(GroupAction): true if any of the actions
+%%		dissobey the simultaneous action rules.
+%%
+%%  Eg. no robot is allowed to pick up a box another robot is
+%%  picking up or no robot is trying to put a block on a block
+%%  another robot is lifting.
+%%
+%%  Simultaneous action rules are defined in the domain.
+%%
+
+
+%%
 %%  group_action(ListPrimAct): a list of primitive actions
 %%
 %%  A group action is a list of primitive actions with one action for
@@ -73,8 +85,8 @@ group_action(List) :-
 	map(actor, List, AgentList),
 	map(primitive_action, List),
 	unique_list(AgentList).				% GET UNWANTED PERMUTATIONS HERE :(
-	
-	
+
+
 %%
 %%  legal(S):    legality of a situation
 %%
@@ -85,33 +97,27 @@ legal(s0).
 legal(do(A, S)) :-
 	primitive_action(A), poss(A, S), legal(S)
 	;
-	group_action(A), legal_group_action(A, S), legal(S).
+	group_action(A),
+	legal_group_action(A, S),
+	legal(S).
 
-legal_group_action([], _).
-legal_group_action([A|As], S) :-
-	no_similar_actions(A, As),
-	ungroup_actions(S, UngroupedS), poss(A, UngroupedS),
-	legal_group_action(As, S).
+legal_group_action(GroupAction, S) :-
+	not(simultaneous_action(GroupAction,S)),
+	ungroup_actions(S,UngroupedS),
+	group_poss(GroupAction,UngroupedS).
+	
+group_poss([],_).		% Assume the existing situation is legal. We don't
+						% want to look too closely at ungrouped situations.
+group_poss([A|As],S) :-
+	poss(A,S), group_poss(As,S).
 
-%%
-%%  no_similar_actions(Action, List): true is none of the actions are 'similar'
-%%
-%%  This predicate is true if none of the actions are similar. Eg. no robot is
-%%  trying to pick up a box another robot is picking up.
-%%  Similar is difined in the domain.
-no_similar_actions(_, []).
-no_similar_actions(Act, [A|As]) :-
-	no_similar_actions2(Act, [A|As]),
-	no_similar_actions(A, As).
-no_similar_actions2(_, []).
-no_similar_actions2(Act, [A|As]) :-
-	not(similar_action(Act, A)),
-	no_similar_actions2(Act, As).
 
 %%
 %%  ungroup_actions(GSit, USit): flattens a situation of grouped actions
 %%  into a situation without grouped actions. This is intended for use
 %%  with poss.
+%%
+%%  ie. do([A, B, C], S) -> do(A, do(B, do(C, S)))
 %%
 ungroup_actions(s0, s0).
 ungroup_actions(do([], S), US) :-
