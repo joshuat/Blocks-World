@@ -81,16 +81,15 @@ precedes_eq(S1,S2) :-
 %%  each agent in the system.
 %%
 group_action(List) :-
-	agent_list(AgentList),
-	map(actor, List, AgentList),
-	map(primitive_action, List),
-	unique_list(AgentList).				% GET UNWANTED PERMUTATIONS HERE :(
+	findall(A,agent(A),AgentList),
+	map(actor, List, AgentList).
+    % actor/2 specifies primitive_action
 
 
 %%
 %%  legal(S):    legality of a situation
 %%
-%%  The predicate legal/3 must be true if the situation S is composed
+%%  The predicate must be true if the situation S is composed
 %%  of legal actions. Actions are legal if they are possible in the
 %%  given situation.
 legal(s0).
@@ -102,12 +101,11 @@ legal(do(A, S)) :-
 	legal(S).
 
 legal_group_action(GroupAction, S) :-
-	not(simultaneous_action(GroupAction,S)),
 	ungroup_actions(S,UngroupedS),
-	group_poss(GroupAction,UngroupedS).
+	group_poss(GroupAction,UngroupedS),
+	not(simultaneous_action(GroupAction,S)).
 	
-group_poss([],_).		% Assume the existing situation is legal. We don't
-						% want to look too closely at ungrouped situations.
+group_poss([],_).		% Assume the existing situation is legal.
 group_poss([A|As],S) :-
 	poss(A,S), group_poss(As,S).
 

@@ -38,7 +38,7 @@ strength(robot3, 1).
 %%  						that a robot can stack
 %%
 height(robot1, 2).
-height(robot2, 1).
+height(robot2, 2).
 height(robot3, 2).
 
 agent_list([robot1,robot2,robot3]).
@@ -56,9 +56,8 @@ agent(Robot) :-
 %%
 block(block1).
 block(block2).
-%block(block3).
-
-block_list([block1,block2]).
+block(block3).
+block(block4).
 
 
 %%
@@ -66,7 +65,17 @@ block_list([block1,block2]).
 %%
 weight(block1, 2).
 weight(block2, 1).
+weight(block3, 1).
+weight(block4, 1).
 
+%%
+%%  type(Block, Type): specify the type of each block
+%%
+%%  eg. Blocks could be products so, type(block,productA).
+%%
+type(block1, type1).
+type(block2, type1).
+type(block3, type2).
 
 %%  
 %%  floor(Floor): specifies the floor
@@ -85,8 +94,8 @@ floor(floor).
 %%  The following below the "no-op" action.  As the action as no effect,
 %%  successor state axioms are not necessary.
 %%
-primitive_action(noop(A)) :-
-    agent(A).
+%primitive_action(noop(A)) :-
+%    agent(A).
 
 %% grab(Robot,Block): Robot grabs a block.
 primitive_action(grab(Robot,Block)) :-
@@ -182,6 +191,11 @@ simultaneous_action(Actions,_) :-
 simultaneous_action(Actions,_) :-
 	member(A,Actions), A=put_down(_,_,Place),
 	member(B,Actions), B=lift(_,Place).
+%%  Cannot put two different blocks in the same place (unless floor).
+simultaneous_action(Actions,_) :-
+	member(A,Actions), A=put_down(_,BlockA,BlockC),
+	member(B,Actions), B=put_down(_,BlockB,BlockC),
+    BlockA\=BlockB, BlockC\=floor.
 %%  Robots cannot lift a block and put it down at the same time.
 simultaneous_action(Actions,_) :-
 	member(A,Actions), A=put_down(_,Block,_),
@@ -261,6 +275,7 @@ on_top(Block,Y,do(A,S)) :-
 on_top(block1, floor, s0).
 on_top(block2, floor, s0).
 on_top(block3, floor, s0).
+on_top(block4, floor, s0).
 
 
 %%

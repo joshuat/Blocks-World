@@ -20,12 +20,26 @@ map1(Function,[L|Ls],[R|Rs]) :-
 map1(_,[],[]).
 
 %%
+%%  max(List,Max): Max is the highest value in List
+%%
+max([X],X).
+max([X|Xs],X) :-
+    max(Xs,X2), X >= X2.
+max([X|Xs],X2) :-
+    max(Xs,X2), X2 > X.
+
+%%
 %%  unique_list(List): is true if every element in List is unique
 %%
 unique_list([L|Ls]) :-
 	not(member(L, Ls)),
 	unique_list(Ls).
 unique_list([]).
+
+%%
+%%  head(List,Head): Head is the head of List.
+%%
+head([X|_],X).
 
 %%
 %%  pretty_print(S): prints the situation legibly
