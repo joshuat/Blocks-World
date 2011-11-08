@@ -1,10 +1,25 @@
 goal(S) :-
     on_top(block1, block2, S).
 
+goal2(S) :-
+    on_top(u, v, S),
+    on_top(v, w, S),
+    on_top(w, d, S),
+    on_top(d, c, S),
+    on_top(c, b, S),     on_top(g, f, S),
+    on_top(b, a, S),     on_top(f, e, S),
+    on_top(a, floor, S), on_top(e, floor, S).
+
+goal3(S) :-
+    on_top(a, b, S),     on_top(u, v, S),
+    on_top(b, c, S),     on_top(v, e, S),
+    on_top(c, d, S),     on_top(e, f, S),     on_top(w, g, S),
+    on_top(d, floor, S), on_top(f, floor, S), on_top(g, floor, S).
+
 dynamic_goal(S) :-
-    not(lifted(_,S)),
+    not(holding(_,_,S)),
     stack_list(Stacks, S),
-    ideal_num_stacks(NStacks), length(Stacks,NStacks),
+    length(Stacks,NStacks), ideal_num_stacks(NStacks),
     heaviest_on_bottom(Stacks).
 
 
@@ -86,3 +101,39 @@ num_blocks(N) :-
 ideal_num_stacks(N) :-
     max_height(H), num_blocks(B),
     N is ceiling(B / H).
+
+%%
+%%  time_to_access(Type, NumActions, S): gives the number of actions
+%%      required to grab a block of Type.
+%%
+%%  This predicate assumes that the block is being accessed by a single
+%%  robot with the strength to lift the desired and all intervening blocks.
+%%
+time_to_access(Type,NumActions,S) :-
+    findall(Block, type(Block,Type), Blocks),
+    time_to_access2(Blocks,Depth,S), NumActions is Depth*4+1.
+        % *4 for grab, lift, put_down, let_go cycle, +1 for grab
+
+time_to_access2([Block],Depth,S) :-
+    stack_depth(Block,Depth,S).
+time_to_access2([B|Bs],D1,S) :-
+    stack_depth(B,D1,S), time_to_access2(Bs,D2,S), D1=<D2.
+time_to_access2([B|Bs],D2,S) :-
+    stack_depth(B,D1,S), time_to_access2(Bs,D2,S), D2<D1.
+
+%%  An alternative implementation for time_to_access could just set
+%%  to goal to grab(_,Block,S) and count the number of actions required
+%%  but this requires a quicker implemenation.
+
+
+%%
+%%  stack_depth(Block,Depth,S): gives the depth of a block for a given S.
+%%
+%%  Depth is defined as the number of blocks above (on_top) of the given
+%%  block.
+stack_depth(Block,Depth,S) :-
+    on_top(Above,Block,S),
+    stack_depth(Above,B2,S),
+    Depth is B2+1.
+stack_depth(Block,0,S) :-
+    not(on_top(_,Block,S)).

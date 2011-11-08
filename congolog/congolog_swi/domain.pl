@@ -21,8 +21,8 @@
 %%  This predicate is true when Rob is the name of a robot in the world.
 %%
 robot(robot1).
-robot(robot2).
-robot(robot3).
+%robot(robot2).
+%robot(robot3).
 
 
 %%
@@ -37,11 +37,10 @@ strength(robot3, 1).
 %%  height(Robot, Height): specify the maximum height (in blocks)
 %%  						that a robot can stack
 %%
-height(robot1, 2).
+height(robot1, 10).
 height(robot2, 2).
 height(robot3, 2).
 
-agent_list([robot1,robot2,robot3]).
 %%
 %%  Robots are agents.
 %%
@@ -54,28 +53,40 @@ agent(Robot) :-
 %%
 %%  This predicate is true when Block is the name of a block in the world.
 %%
-block(block1).
-block(block2).
-block(block3).
-block(block4).
+block(a).
+block(b).
+block(c).
+block(d).
+block(e).
+block(f).
+block(g).
+block(u).
+block(v).
+block(w).
 
 
 %%
 %%  weight(Block, Weight): specify the weight of each block
 %%
-weight(block1, 2).
-weight(block2, 1).
-weight(block3, 1).
-weight(block4, 1).
+weight(a, 1).
+weight(b, 1).
+weight(c, 1).
+weight(d, 1).
+weight(e, 1).
+weight(f, 1).
+weight(g, 1).
+weight(u, 1).
+weight(v, 1).
+weight(w, 1).
 
 %%
 %%  type(Block, Type): specify the type of each block
 %%
 %%  eg. Blocks could be products so, type(block,productA).
 %%
-type(block1, type1).
-type(block2, type1).
-type(block3, type2).
+type(a, type1).
+type(b, type1).
+type(c, type2).
 
 %%  
 %%  floor(Floor): specifies the floor
@@ -272,10 +283,17 @@ on_top(Block,Y,do(A,S)) :-
 %%  there arent many clauses here.
 %%
 
-on_top(block1, floor, s0).
-on_top(block2, floor, s0).
-on_top(block3, floor, s0).
-on_top(block4, floor, s0).
+%on_top(block1, floor, s0).
+%on_top(block2, floor, s0).
+%on_top(block3, floor, s0).
+%on_top(block4, floor, s0).
+
+on_top(u, a, s0).
+on_top(a, b, s0).
+on_top(b, c, s0).     on_top(v, e, s0).
+on_top(c, d, s0).     on_top(e, f, s0).     on_top(w, g, s0).
+on_top(d, floor, s0). on_top(f, floor, s0). on_top(g, floor, s0).
+
 
 
 %%
@@ -314,3 +332,9 @@ height(Block,Height,S) :-
 	on_top(Block,Base,S),
 	height(Base,BaseHeight,S),
 	Height is BaseHeight+1.
+
+%%
+%%  primary_object(Action, Object): gives the first object for the action.
+%%
+primary_object(Action, Object) :-
+    primitive_action(Action), arg(2,Action,Object).
