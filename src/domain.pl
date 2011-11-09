@@ -22,6 +22,15 @@
 agent(Robot) :-
 	robot(Robot).
 
+	
+%%
+%%  actor(Actn,Agt):  performing agent for Actions
+%%
+%%  This predicate binds Agt to the agent performing primitive action Actn.
+%%
+actor(Actn,Agt) :-
+    primitive_action(Actn), arg(1,Actn,Agt).
+	
 
 %%
 %%  primitive_action(Act):  specify primitive actions
@@ -30,18 +39,20 @@ agent(Robot) :-
 %%  in the world.  Actions are typically parameterised in terms of the
 %%  objects they act on.
 
-%%
-%%  The following below the "no-op" action.  As the action as no effect,
-%%  successor state axioms are not necessary.
-%%
-primitive_action(noop(A)) :-
-    agent(A).
 
 %%  move(Robot,Block,Place): Robot moves Block to Place.
 primitive_action(move(Robot,Block,Place)) :-
     robot(Robot), block(Block),
     (block(Place) ; floor(Place)).
 
+
+%%
+%%  The following below the "no-op" action.  As the action as no effect,
+%%  successor state axioms are not necessary.
+%%
+primitive_action(noop(A)) :-
+agent(A).
+	
 
 %%
 %%  poss(A,S):  possibility of performing an action
@@ -53,12 +64,15 @@ primitive_action(move(Robot,Block,Place)) :-
 %%
 %%  move(Robot,Block,Place)
 %%
-%%  Robots can only move blocks on top of blocks that don't
-%%  have something on top of them already (unless they're
-%%  putting the block on the floor). Blocks cannot be placed
-%%  above a robot's max height.
+%%  -blocks can't have anything on top of it
+%%  -blocks can't be moved to a block they're already on
+%%  -place can't have anythign on top of it unless it's the floor
+%%  -blocks cannot be placed above a robots height
+%%
 poss(move(Robot,Block,Place),S) :-
     Block \= Place,
+	\+ on_top(_,Block,S),
+	\+ on_top(Block,Place,S),
 	height(Place, PlaceHeight, S), height(Robot, RobotHeight),
     RobotHeight > PlaceHeight,
 	(
@@ -113,6 +127,18 @@ on_top(Block,Y,do(A,S)) :-
 %%
 height(floor,0,_).
 height(Block,Height,S) :-
-    on_top(Block,Y,S), height(Y,Height-1,S).
+    on_top(Block,Y,S), height(Y,H,S), Height is H+1.
+
+%%
+%%  good_action(A,S): A is a 'good' action in S
+%%
+good_action(A,S) :- not(bad_action(A,S)).
 
 
+%%
+%%  bad_action(A,S): A is a 'bad' action in S
+%%
+%%  These are actions that do not contribute towards the goal.
+
+% Move the same block twice in a row. (this would be fine with concurrency)
+bad_action(move(_,A,_),do(move(_,A,_),_)).
