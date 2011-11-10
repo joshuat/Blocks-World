@@ -22,7 +22,7 @@
 %%
 robot(robot1).
 robot(robot2).
-%robot(robot3).
+robot(robot3).
 
 
 %%
@@ -37,7 +37,7 @@ strength(robot3, 1).
 %%  height(Robot, Height): specify the maximum height (in blocks)
 %%  						that a robot can stack
 %%
-height(robot1, 10).
+height(robot1, 2).
 height(robot2, 2).
 height(robot3, 2).
 
@@ -57,27 +57,15 @@ block(a).
 block(b).
 block(c).
 block(d).
-block(e).
-block(f).
-block(g).
-block(u).
-block(v).
-block(w).
 
 
 %%
 %%  weight(Block, Weight): specify the weight of each block
 %%
-weight(a, 1).
+weight(a, 2).
 weight(b, 1).
 weight(c, 1).
 weight(d, 1).
-weight(e, 1).
-weight(f, 1).
-weight(g, 1).
-weight(u, 1).
-weight(v, 1).
-weight(w, 1).
 
 %%
 %%  type(Block, Type): specify the type of each block
@@ -87,6 +75,7 @@ weight(w, 1).
 type(a, type1).
 type(b, type1).
 type(c, type2).
+type(d, type2).
 
 %%  
 %%  floor(Floor): specifies the floor
@@ -141,10 +130,11 @@ poss(let_go(Robot,Block),S) :-
 	holding(Robot,Block,S), \+ lifted(Block,S).
 
 %%  Robots can only lift up a block if they are holding that
-%%  block.
+%%  block, it hasn't already been lift and it doesn't have anything
+%%  on top of it.
 %%  Strength and weight are handled in the simultaneous action rules.
 poss(lift(Robot,Block),S) :-
-    holding(Robot,Block,S), \+lifted(Block,S).
+    holding(Robot,Block,S), \+lifted(Block,S), \+on_top(_,Block,S).
 
 %%  Robots can only put blocks on top of blocks that
 %%  don't have something on top of them already and aren't lifted,
@@ -283,17 +273,8 @@ on_top(Block,Y,do(A,S)) :-
 %%  there arent many clauses here.
 %%
 
-%on_top(block1, floor, s0).
-%on_top(block2, floor, s0).
-%on_top(block3, floor, s0).
-%on_top(block4, floor, s0).
-
-on_top(u, a, s0).
 on_top(a, b, s0).
-on_top(b, c, s0).     on_top(v, e, s0).
-on_top(c, d, s0).     on_top(e, f, s0).     on_top(w, g, s0).
-on_top(d, floor, s0). on_top(f, floor, s0). on_top(g, floor, s0).
-
+on_top(b, floor, s0).	on_top(c, floor, s0). on_top(d, floor, s0).
 
 
 %%

@@ -48,10 +48,10 @@ head([X|_],X).
 pretty_print(s0) :- pretty_print(s0, _).
 pretty_print(do(A,S)) :- pretty_print(do(A,S), _).
 %%  Actions
-pretty_print([]).
+pretty_print([A]) :-
+	write('\t'), write(A).
 pretty_print([A|As]) :-
-	write(A),
-	write(',\t'),
+	write('\t'), write(A), write(','), nl,
 	pretty_print(As).
 %% Situations
 pretty_print(s0, 0) :-

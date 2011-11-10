@@ -6,7 +6,7 @@
 stack :-
     cputime(T1),
     	(
-            stack(8)
+            qstack(4)
             ;
             true
         ),
@@ -22,15 +22,7 @@ stack(Limit) :-
 	stack(s0, 1, Limit).
 
 qstack(Limit) :-
-    cputime(T1),
-  	(
-      	quick_stack(s0, 0, Limit)
-        ;
-        true
-    ),
-    cputime(T2),
-    DT is T2-T1,
-    write('Time taken: '), write(DT),nl,nl.
+    quick_stack(s0, 1, Limit).
 
 	
 not_quick_stack(N, Limit) :-
@@ -48,7 +40,7 @@ stack(PrevS, N, Limit) :-
     N=<Limit,
     generate_next_legal_situation(PrevS, S),
     (
-        ungroup_actions(S, UngroupedS), goal3(UngroupedS),
+        ungroup_actions(S, UngroupedS), goal(UngroupedS),
         nl, nl, pretty_print(S), nl, nl
         ;
         M is N+1,
@@ -60,7 +52,7 @@ quick_stack(PrevS, N, Limit) :-
     legal_group_stack_action(PrevS, S),
     (
         ungroup_actions(S, UngroupedS),
-        goal2(UngroupedS),
+        goal(UngroupedS),
         nl, nl, pretty_print(S), nl, nl
         ;
         M is N+4,   % recursion adds 4 actions
