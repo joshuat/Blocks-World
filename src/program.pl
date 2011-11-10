@@ -19,9 +19,11 @@
 go :- go(5).
 
 go(Limit) :-
+	write('Generating goal...'), nl,
 	generate_goal(G),
 	write('Looking for plans...'), nl,
 	findall(S, do(go(0,Limit, G),s0,S), SList),
+	write('Finding shortest plan...'), nl,
 	map(sit_len, SList, LList),
 	min_dual_list(SList, LList, SMin, _),
 	show_action_history(SMin).
@@ -29,7 +31,7 @@ go(Limit) :-
 proc(go(N,Limit, Goal),
 	if(goal(Goal),
 		% then
-		?(println('Found one!')),
+		?(println('Found one.')),
 		% else
 		if(N<Limit,
 			% then

@@ -1,21 +1,3 @@
-goal1(S) :-
-    on_top(d, c, S),
-    on_top(c, b, S),     on_top(g, f, S),
-    on_top(b, a, S),     on_top(f, e, S),
-    on_top(a, floor, S), on_top(e, floor, S).
-
-goal2(S) :-
-    on_top(a, b, S),
-    on_top(b, c, S),
-    on_top(c, d, S),     on_top(e, f, S),
-    on_top(d, floor, S), on_top(f, floor, S), on_top(g, floor, S).
-
-	
-goal3(S) :-
-	on_top(a, b, S),
-	on_top(b, floor, S),	on_top(c, floor,S).
-
-
 goal(G,S) :-
 	check_stacks(G,S).
 
@@ -58,11 +40,6 @@ generate_goal(Goal) :-
 min_access_time(GoalList,Goal) :-
 	map(average_access, GoalList, AverageList),
 	min_dual_list(GoalList, AverageList, Goal, _).
-
-
-
-
-
 
 %%
 %% Goal Utility Functions

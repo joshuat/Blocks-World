@@ -7,8 +7,8 @@
 %%  there arent many clauses here.
 %%
 
-on_top(a, b, s0).
-on_top(b, floor, s0). on_top(f, floor, s0).
+on_top(a, b, s0).       on_top(d, f, s0).
+on_top(b, floor, s0).   on_top(f, floor, s0).
 
 
 
@@ -51,7 +51,7 @@ height(r3, 4).
 block(a).
 block(b).
 %block(c).
-%block(d).
+block(d).
 %block(e).
 block(f).
 %block(g).
