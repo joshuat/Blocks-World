@@ -1,1 +1,149 @@
-tex will go here.
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{MnSymbol}
+
+\begin{document}
+
+	\begin{center}
+		\huge
+		Software Agents:\\
+		Project 1
+	\end{center}
+
+	\begin{flushright}
+		\normalsize
+		Joshua Torrance\\
+		267920
+	\end{flushright}
+
+
+\section{Introduction}
+
+The blocks world domain is a well known problem domain which do to its initial
+simplicity has been used frequently in the study of AI and planning. Simple
+blocks world consists of a set of blocks and a robots. The aim is to get the robot
+to stack the blocks in a given order as fast as possible.
+
+\section{Extensions to Blocks World}
+This project had several goals all of which extend the simple blocks world domain
+in various ways.
+
+\subsection{Multiple Agents}
+
+A common addition is multiple robots since this allows interesting examination
+of multi-agent interactions and cooperation. One way of implementing multiple
+agents is simply to get the agents to take turns doing actions and interleave
+those actions in the action sequence. This simulates simultaneous actions but
+it is difficult to get the robots to cooperate. A better way is to get the robots
+to actually take their actions simultaneously.
+
+
+\subsection{Block Weights}
+
+Complexity is added to the simple blocks world domain by giving all of the
+blocks a certain weights and the robots strength such that a robot is unable to
+lift a block if it is too heavy for it. This means that in order to lift some heavy
+blocks the robots must cooperate.
+
+\subsection{Height}
+
+Another simple extension is to give each of the robots a height such that they
+are unable to stack block above their height. For example a robot with a height
+of 1 would be unable to stack any blocks on top of other blocks.
+
+\subsection{Agent Cooperation}
+
+As mentioned above in order to lift heavy blocks the agents must cooperate. The
+creates extra complexity for the problem in order to get the robots to cooperate
+effectively.
+
+\subsection{Dynamic Goals}
+
+Instead of the user specifying the exact sequence of blocks they would like
+it is possible to specify a set of rules that make a desirable outcome such as
+minimising the number of stacks or putting all the heavy blocks on the bottom.
+
+\section{Programs}
+
+The results of this project consist of two programs which implement an extended
+blocks world in two different ways. The frst program implement the domain
+with a original implementation of the situation calculus with successful use of
+simultaneous actions. The second program is built on ConGolog and generates
+plans with dynamic goals but without true simultaneous actions.
+Unfortunately both programs suffer from poor performance when given any
+scenario with a moderate number of entities.
+
+\subsection{sitcalc}
+Sitcalc has extended blocks world to deal with:
+\begin{itemize}
+	\item Multiple agents.
+	\item Block weight and robot strength.
+	\item Robot height.
+	\item True simultaneous actions.
+	\item Agent cooperation.
+	\item Simply dynamic goals.
+\end{itemize}
+
+In order to implement simultaneous, cooperative actions in stead of the
+standard do(A,S) style of situations sitcalc uses a list of actions; do([ A,B,...],S)
+combined with a set of rules (the simultaneous\_actions predicates) which define
+the combinations of actions that are not permitted. This, along with the stan-
+dard situation calculus, allows the agents to simultaneous perform cooperative
+actions.
+
+The new situation calculus has also been implemented independent of the
+domain.
+
+\subsection{ConGolog}
+The ConGolog program implements similar features to the sitcalc program,
+albeit slightly more polished, but is using Ryan Kelly's implementation of Con-
+Golog for the situation calculus.
+This program implements:
+\begin{itemize}
+	\item Multiple agents with interleaved actions.
+	\item Block weight and robot strength.
+	\item Robot height.
+	\item Complicated dynamic goals.
+\end{itemize}
+
+The programs goals are generated during run time in order to be able to
+create a reasonable goal for any initial state. A number of arbitrary rules are
+used to generate possible goals:
+\begin{itemize}
+	\item All blocks must be part of the solution.
+	\item Minimise the number of stacks.
+	\item Place the heavier blocks at the bottom of the stacks.
+\end{itemize}
+
+The last component of goal generation is minimising the time required to
+access each type of block. Each block is has a type (such as productA or
+productB) and the goal with the lowest average access time for each type of
+block is chosen as the final goal. This could be useful in a warehouse simulation
+where quick access to types of good is required.
+
+
+\section{Further Work}
+
+There is obviously a huge amount of scope for the blocks world domain but the
+main things that could benefit these program involve the execution times for
+complicated situations (which are currently woeful for both programs). Fortu-
+nately there is a large amount of literature dealing with this issue.
+There are many other interesting extensions that could be implemented for
+these programs:
+\begin{itemize}
+	\item Heuristic action choice.
+	\item An ongoing warehouse problem where new blocks are added to the system
+and certain blocks must be removed from the system at times (these would
+be exogenous actions).
+	\item More complicated handling of robot-block interactions (such as some robots
+being able to handle certain types of blocks or robot movement around
+blocks).
+	\item Knowledge about block attributes and locations (imagine a warehouse
+with multiple rooms and robots have limited knowledge about rooms they
+aren't in).
+\end{itemize}
+
+\end{document}
+
+
