@@ -354,5 +354,5 @@ show_action_history(do(A,S)) :-
 %%  sit_len(S,Len): length of a situation
 %%
 sit_len(s0,0).
-sit_len(do(A,S),N) :-
+sit_len(do(_,S),N) :-
 	sit_len(S,M), N is M+1.

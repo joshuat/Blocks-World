@@ -16,33 +16,40 @@
 :- include(situation).
 :- include(goals).
 
-stack :- stack(5).
+go :- go(5).
 
-stack(Limit) :-
+go(Limit) :-
 	generate_goal(G),
 	write('Looking for plans...'), nl,
-	findall(S, do(stack2(0,Limit, G),s0,S), SList),
+	findall(S, do(go(0,Limit, G),s0,S), SList),
 	map(sit_len, SList, LList),
 	min_dual_list(SList, LList, SMin, _),
 	show_action_history(SMin).
 
-proc(stack2(N,Limit, Goal),
+proc(go(N,Limit, Goal),
 	if(goal(Goal),
 		% then
 		?(println('Found one!')),
 		% else
 		if(N<Limit,
 			% then
-			pi(a, ?(action(a, r1)) : a) :
-			pi(i,?(i is N+1) : stack2(i,Limit,Goal)),
+            do_actions : pi(i,?(i is N+1) : go(i,Limit,Goal)),
 			% else
 			fail
 		)
 	)
 ).
-	
 
-holdsInSituation(test(G),_) :- write('It is all true! G is'), write(G),nl.
+proc(do_actions,
+    ?(agent_list(AgentList)) : do_action(AgentList)
+).
+
+proc(do_action([]), ?(true)).
+proc(do_action([Agent|List]),
+    pi(a, ?(action(a,Agent)) : a) :
+    do_action(List)
+).
+
 
 holdsInSituation(true,_).
 holdsInSituation('='(A,B),_) :- A = B.
@@ -54,8 +61,11 @@ holdsInSituation(is(A,B),_) :- A is B.
 holdsInSituation(goal,S) :- goal(S).
 holdsInSituation(goal(G),S) :- goal(G,S).
 holdsInSituation(on_top(X,Y),S) :- on_top(X,Y,S).
+holdsInSituation(agent(A),_) :- agent(A).
+holdsInSituation(agent_list(AgentList),_) :- findall(A,agent(A),AgentList).
 holdsInSituation(action(A, Actor),S) :-
-	actor(A,Actor), poss(A,S), good_action(A,S). % actor insists on primitive_action
+	actor(A,Actor), poss(A,S), good_action(A,S).
+    % actor insists on primitive_action
 holdsInSituation(good_action(A),S) :- good_action(A,S).
 holdsInSituation(println(Stuff),_) :- write(Stuff), nl.
 holdsInSituation(print(Stuff),_) :- write(Stuff).
