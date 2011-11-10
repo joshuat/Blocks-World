@@ -18,7 +18,9 @@
 %%    until a legal execution is found, and will determine more legal
 %%    executions when it is backtracked.
 %%
-%%
+%%  Some edits to this file have been made by Joshua Torrance they are clearly
+%%  indicated with Begin EDIT and End EDIT.  They are mainly to do with holds.
+%%	Date: 11/11/2011
 
 
 %%
@@ -254,6 +256,13 @@ holds(neg(all(V,C)),S) :-
     holds(some(V,neg(C)),S).
 holds(neg(some(V,C)),S) :-
     \+ holds(some(V,C),S).
+% Begin EDIT
+
+% I'm not entirely sure what these predicates are supposed to be doing.
+% Removing them doesn't seem to do any harm (to this program anyway) and
+% it allows the holdsInSituations clauses to actually be reached.
+% -joshuat 11/11/2011
+
 %holds(P_Xs,S) :-
 %    P_Xs \= and(_,_), P_Xs \= or(_,_), P_Xs \= neg(_), P_Xs \= all(_,_),
 %    P_Xs \= some(_,_), sub(now,S,P_Xs,P_XsS), P_XsS.
@@ -264,6 +273,19 @@ holds(neg(some(V,C)),S) :-
 % NB every primitive test predicate needs a holdsInSituation clause
 holds(neg(A),S) :- not(holdsInSituation(A,S)).
 holds(A,S) :- holdsInSituation(A,S).
+
+% Some simple test predicates.
+% The user will need to specify holdsInSituation clauses for anything
+% else they want to test.
+holdsInSituation(true,_).
+holdsInSituation('='(A,B),_) :- A = B.
+holdsInSituation('=<'(A,B),_) :- A =< B.
+holdsInSituation('=>'(A,B),_) :- A >= B.
+holdsInSituation('<'(A,B),_) :- A < B.
+holdsInSituation('>'(A,B),_) :- A > B.
+holdsInSituation(is(A,B),_) :- A is B.
+
+% End EDIT
 
 
 %%
@@ -349,10 +371,11 @@ show_action_history(do(A,S)) :-
     show_action_history(S),
     display('do '), display(A), nl.
 
-
+% Begin EDIT
 %%
 %%  sit_len(S,Len): length of a situation
 %%
 sit_len(s0,0).
 sit_len(do(_,S),N) :-
 	sit_len(S,M), N is M+1.
+% End EDIT

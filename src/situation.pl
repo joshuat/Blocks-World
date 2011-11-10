@@ -1,4 +1,13 @@
 %%
+%%  situation.pl: Defines the initial conditions and entities for
+%%					an extended blocks world.
+%%
+%%  Author: Joshua Torrance (joshuat)
+%%  Date: 11/11/2011
+%%
+
+
+%%
 %%  Initial Conditions for the domain
 %%
 %%  The initial conditions are specified by additional clauses for
@@ -13,8 +22,13 @@ on_top(b, floor, s0).   on_top(f, floor, s0).
 
 
 %%
-%%  Entities in the domain.
+%%  Entities in the domain and their attributes.
 %%
+%%  Some of the entities are commented out to ensure useful
+%%  execution times for the program.
+%%  When entities are included or excluded they must be
+%%  added or removed from the initial situation. Their attributes
+%%  can be left uncommented-out.
 
 %%  
 %%  robot(Rob):  specify robots (agents) in the system
@@ -29,7 +43,7 @@ robot(r1).
 %%
 %%  strength(Robot, Strength): specify the strength of each robot
 %%
-strength(r1, 1).
+strength(r1, 5).
 strength(r2, 2).
 strength(r3, 3).
 
@@ -91,6 +105,10 @@ type(g, t3).
 
 %%  
 %%  floor(Floor): specifies the floor
+%%
+%%  Multiple floors could be useful if there are multiple surfaces
+%%  that can cater for any number of blocks. This might do strange
+%%  things to some of the more complicated predicates though.
 %%
 floor(floor).
 

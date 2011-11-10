@@ -1,3 +1,34 @@
+%%
+%%  program.pl: Top-level prolog file for ConGolog implementation.
+%%
+%%  Author: Joshua Torrance (joshuat)
+%%  Date: 11/11/2011
+%%
+%%  In order to execute the program at the prolog interpreter prompt:
+%%		?- consult(program).	% Don't worry about the style warnings.
+%%		?- go.
+%%
+%%  This file intends to be domain independent of a particular situation.
+%%
+%%  In order to define a particular domain see:
+%%  -domain.pl		Definitions of the domain such as possibility axioms,
+%%					successor state axioms and good action choice axioms.
+%%  -situation.pl	Definitions of objects and agents in the domain as
+%%					well as the initial situation.
+%%  -goal.pl		Definitions of the goals of system.
+%%
+%%  The other dependents are:
+%%  -congolog.pl	Ryan Kelly's (slightly edited) ConGolog implementation.
+%%					The changes are clearly marked with EDIT.
+%%  -utility.pl		A whole bunch of useful functions used by the program.
+%%
+%%  This file is roughly based of Ryan Kelly's main.pl inplementation of
+%%  the cooking domain.
+%%
+%%  TODO: Implement true concurrency.
+%%  TODO: Speed up execution with more intelligent action selection.
+%%
+
 :- discontiguous trans/4, final/2, prim_action/1, natural/1, poss/3,
                  conflicts/3, start/2.
 
@@ -10,14 +41,23 @@
 :- op(640,xfy,>>). % Prioritised concurrency
 :- op(620,fx,?).   % Test
 
+%%
+%%  Include the relevant definitions.
+%%
 :- include(congolog).
 :- include(utility).
 :- include(domain).
 :- include(situation).
 :- include(goals).
 
+%%
+%%  go: Main entry point for the progrom.
+%%
 go :- go(5).
 
+%%
+%%  go(Limit): High level program. Limit is the maximum number of actions.
+%%
 go(Limit) :-
 	write('Generating goal...'), nl,
 	generate_goal(G),
@@ -28,6 +68,13 @@ go(Limit) :-
 	min_dual_list(SList, LList, SMin, _),
 	show_action_history(SMin).
 
+
+%%
+%%  go(N,Limit,Goal): Primary ConGolog procedure.
+%%
+%%  N is the current iteration, Limit is the maximum number of iterations,
+%%  Goal is the situation we're trying to achieve (tested with goal(Goal)).
+%%
 proc(go(N,Limit, Goal),
 	if(goal(Goal),
 		% then
@@ -42,6 +89,13 @@ proc(go(N,Limit, Goal),
 	)
 ).
 
+
+%%
+%%  do_actions: gets each agent in the system to perform an action.
+%%
+%%  True concurrency has not yet been implemented. Currently the agents
+%%  just take turns performing actions.
+%%
 proc(do_actions,
     ?(agent_list(AgentList)) : do_action(AgentList)
 ).
@@ -53,22 +107,34 @@ proc(do_action([Agent|List]),
 ).
 
 
-holdsInSituation(true,_).
-holdsInSituation('='(A,B),_) :- A = B.
-holdsInSituation('=<'(A,B),_) :- A =< B.
-holdsInSituation('=>'(A,B),_) :- A >= B.
-holdsInSituation('<'(A,B),_) :- A < B.
-holdsInSituation('>'(A,B),_) :- A > B.
-holdsInSituation(is(A,B),_) :- A is B.
-holdsInSituation(goal,S) :- goal(S).
-holdsInSituation(goal(G),S) :- goal(G,S).
-holdsInSituation(on_top(X,Y),S) :- on_top(X,Y,S).
-holdsInSituation(agent(A),_) :- agent(A).
+%%
+%%  agent_list(A): retrieves a list of all agents in the system.
+%%
 holdsInSituation(agent_list(AgentList),_) :- findall(A,agent(A),AgentList).
+
+
+%%
+%%  action(Action,Actor): determines an action for Actor.
+%%
+%%  poss and good_action should be defined in the domain.
+%%
 holdsInSituation(action(A, Actor),S) :-
 	actor(A,Actor), poss(A,S), good_action(A,S).
     % actor insists on primitive_action
-holdsInSituation(good_action(A),S) :- good_action(A,S).
+
+%%
+%%  actor(Actn,Agt):  performing agent for Actions
+%%
+%%  This predicate binds Agt to the agent performing primitive action Actn.
+%%
+actor(Actn,Agt) :-
+    primitive_action(Actn), arg(1,Actn,Agt).
+
+
+%%
+%% Some useful print 'test' predicates.
+%%
 holdsInSituation(println(Stuff),_) :- write(Stuff), nl.
 holdsInSituation(print(Stuff),_) :- write(Stuff).
 holdsInSituation(printS,S) :- write(S),nl.
+
