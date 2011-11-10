@@ -266,7 +266,7 @@ holds(neg(some(V,C)),S) :-
 %holds(P_Xs,S) :-
 %    P_Xs \= and(_,_), P_Xs \= or(_,_), P_Xs \= neg(_), P_Xs \= all(_,_),
 %    P_Xs \= some(_,_), sub(now,S,P_Xs,P_XsS), P_XsS.
-%holds(neg(P_Xs),S) :- write('Hello!11'),
+%holds(neg(P_Xs),S) :-
 %    P_Xs \= and(_,_), P_Xs \= or(_,_), P_Xs \= neg(_), P_Xs \= all(_,_),
 %    P_Xs \= some(_,_), sub(now,S,P_Xs,P_XsS), \+ P_XsS.
 
