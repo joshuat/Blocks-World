@@ -21,7 +21,7 @@
 %%  This predicate is true when Rob is the name of a robot in the world.
 %%
 robot(robot1).
-%robot(robot2).
+robot(robot2).
 %robot(robot3).
 
 

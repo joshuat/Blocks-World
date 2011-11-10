@@ -59,14 +59,19 @@ go :- go(5).
 %%  go(Limit): High level program. Limit is the maximum number of actions.
 %%
 go(Limit) :-
+	cputime(T1),
 	write('Generating goal...'), nl,
 	generate_goal(G),
+	cputime(T2), write('Time taken: '),
+	DT21 is T2 - T1, write(DT21), nl,
 	write('Looking for plans...'), nl,
 	findall(S, do(go(0,Limit, G),s0,S), SList),
 	write('Finding shortest plan...'), nl,
 	map(sit_len, SList, LList),
 	min_dual_list(SList, LList, SMin, _),
-	show_action_history(SMin).
+	show_action_history(SMin),
+	cputime(T3), write('Time taken: '),
+	DT32 is T3 - T2, write(DT32), nl.
 
 
 %%

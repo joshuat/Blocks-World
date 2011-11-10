@@ -1,3 +1,8 @@
+:- include(utility).
+:- include(sitcalc).
+:- include(domain).
+:- include(goals).
+
 stack :-
     cputime(T1),
     	(
