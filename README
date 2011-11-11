@@ -1,1 +1,9 @@
-I'm sure that something useful will go here.
+This project consists of a short report and two programs.
+The report is the file report.pdf and should be in the same directory as this file.
+
+The two program are located in:
+./src/sitcalc/
+and
+./src/congolog/
+
+Additional readme files with instructions are located in those directories.

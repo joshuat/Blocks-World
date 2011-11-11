@@ -1,0 +1,14 @@
+To run sitcalc start prolog in the sitcalc directory.
+
+At the prompt:
+?- consult(program).
+?- demo1.
+
+
+The situation can be edited in domain.pl.
+Goals can be edited in goals.pl.
+
+The program currently has performance issues for
+most scenarios more complicated than the current one.
+
+While examining the program it is adviced to start with program.pl and/or domain.pl.

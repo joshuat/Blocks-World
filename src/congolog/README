@@ -1,0 +1,15 @@
+To run the congolog program start prolog in the congolog directory.
+
+At the prompt:
+?- consult(program).
+?- demo1.
+?- demo2.
+
+
+The situation can be edited in situation.pl.
+Goals can be edited in goals.pl.
+
+The program currently has performance issues for
+most scenarios more complicated than the current one.
+
+While examining the program it is adviced to start with program.pl and/or domain.pl.

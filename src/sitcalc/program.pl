@@ -21,6 +21,14 @@
 :- include(goals).
 
 %%
+%%  Demonstrations.
+%%
+demo1 :-
+	write('This demonstrates agent cooperation to lift a heavy block.'),nl,nl,
+	qstack.
+
+
+%%
 %%  qstack: A relatively efficient stacking procedure.
 %%
 %%  qstack acquires its efficiency by forcing each agent to

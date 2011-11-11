@@ -20,7 +20,7 @@
 
 \section{Introduction}
 
-The blocks world domain is a well known problem domain which do to its initial
+The blocks world domain is a well known problem domain which due to its initial
 simplicity has been used frequently in the study of AI and planning. Simple
 blocks world consists of a set of blocks and a robots. The aim is to get the robot
 to stack the blocks in a given order as fast as possible.
@@ -31,19 +31,20 @@ in various ways.
 
 \subsection{Multiple Agents}
 
-A common addition is multiple robots since this allows interesting examination
+Adding multiple agents is a common addition to blocks world since this allows interesting examination
 of multi-agent interactions and cooperation. One way of implementing multiple
 agents is simply to get the agents to take turns doing actions and interleave
 those actions in the action sequence. This simulates simultaneous actions but
 it is difficult to get the robots to cooperate. A better way is to get the robots
-to actually take their actions simultaneously.
+to actually take their actions simultaneously but this requires careful handling of which actions
+are permitted to the robots.
 
 
 \subsection{Block Weights}
 
 Complexity is added to the simple blocks world domain by giving all of the
-blocks a certain weights and the robots strength such that a robot is unable to
-lift a block if it is too heavy for it. This means that in order to lift some heavy
+blocks weights and the robots strength such that a robot is unable to
+lift a block if the block's weight is greater than the robot's strength. This means that in order to lift some heavy
 blocks the robots must cooperate.
 
 \subsection{Height}
@@ -88,8 +89,8 @@ Sitcalc has extended blocks world to deal with:
 In order to implement simultaneous, cooperative actions in stead of the
 standard do(A,S) style of situations sitcalc uses a list of actions; do([ A,B,...],S)
 combined with a set of rules (the simultaneous\_actions predicates) which define
-the combinations of actions that are not permitted. This, along with the stan-
-dard situation calculus, allows the agents to simultaneous perform cooperative
+the combinations of actions that are not permitted. This, along with the standard
+situation calculus, allows the agents to simultaneous perform cooperative
 actions.
 
 The new situation calculus has also been implemented independent of the
@@ -97,8 +98,7 @@ domain.
 
 \subsection{ConGolog}
 The ConGolog program implements similar features to the sitcalc program,
-albeit slightly more polished, but is using Ryan Kelly's implementation of Con-
-Golog for the situation calculus.
+albeit slightly more polished, but is using Ryan Kelly's implementation of ConGolog for the situation calculus.
 This program implements:
 \begin{itemize}
 	\item Multiple agents with interleaved actions.
@@ -129,6 +129,7 @@ There is obviously a huge amount of scope for the blocks world domain but the
 main things that could benefit these program involve the execution times for
 complicated situations (which are currently woeful for both programs). Fortu-
 nately there is a large amount of literature dealing with this issue.
+
 There are many other interesting extensions that could be implemented for
 these programs:
 \begin{itemize}
