@@ -51,6 +51,21 @@
 :- include(goals).
 
 %%
+%% Demostrations.
+%%
+demo1 :-
+	write('This demonstrates goal generation followed by stacking.'), nl,
+	write('Initial state: [[b,a],[f,d]]'), nl, nl,
+	go.
+	
+demo2 :-
+	write('This demostrates the fact that robot r1 cannot move block f'), nl,
+	write('and thus cannot reach the goal situation.'),nl,
+	write('Initial stage: [a,b,f,d]'), nl, nl,
+	go(10,s1).
+	
+
+%%
 %%  go: Main entry point for the progrom.
 %%
 go :- go(5, s0).

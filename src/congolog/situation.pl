@@ -19,6 +19,10 @@
 on_top(a, b, s0).       on_top(d, f, s0).
 on_top(b, floor, s0).   on_top(f, floor, s0).
 
+on_top(f, d, s1).
+on_top(d, b, s1).
+on_top(b, a, s1).
+on_top(a, floor, s1).
 
 
 %%
