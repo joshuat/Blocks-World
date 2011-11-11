@@ -142,4 +142,22 @@ min_dual_list([G|Gs],[A|As],Gm,Am) :-
 		;
 		A > A2, Gm = G2, Am is A2
 	).
-	
+
+
+%%
+%%  pretty_print(S): prints the situation legibly
+%%
+%%  Entry
+pretty_print(s0) :- pretty_printS(s0, _).
+pretty_print(do(A,S)) :- pretty_printS(do(A,S), _).
+%%  Actions
+pretty_printA(A) :-
+	write(A).
+%% Situations
+pretty_printS(s0, 0) :-
+	write('0: Initial Situation').
+pretty_printS(do(A, S), N) :-
+	pretty_printS(S, M),
+	N is M+1,
+	nl, write(N), write(': '),
+	pretty_printA(A).

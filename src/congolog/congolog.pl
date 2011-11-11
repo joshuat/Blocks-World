@@ -280,7 +280,7 @@ holds(A,S) :- holdsInSituation(A,S).
 holdsInSituation(true,_).
 holdsInSituation('='(A,B),_) :- A = B.
 holdsInSituation('=<'(A,B),_) :- A =< B.
-holdsInSituation('=>'(A,B),_) :- A >= B.
+holdsInSituation('>='(A,B),_) :- A >= B.
 holdsInSituation('<'(A,B),_) :- A < B.
 holdsInSituation('>'(A,B),_) :- A > B.
 holdsInSituation(is(A,B),_) :- A is B.

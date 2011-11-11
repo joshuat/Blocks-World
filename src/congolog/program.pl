@@ -53,25 +53,22 @@
 %%
 %%  go: Main entry point for the progrom.
 %%
-go :- go(5).
+go :- go(5, s0).
 
 %%
 %%  go(Limit): High level program. Limit is the maximum number of actions.
 %%
-go(Limit) :-
+go(Limit, S0) :-
 	cputime(T1),
 	write('Generating goal...'), nl,
 	generate_goal(G),
 	cputime(T2), write('Time taken: '),
 	DT21 is T2 - T1, write(DT21), nl,
 	write('Looking for plans...'), nl,
-	findall(S, do(go(0,Limit, G),s0,S), SList),
-	write('Finding shortest plan...'), nl,
-	map(sit_len, SList, LList),
-	min_dual_list(SList, LList, SMin, _),
-	show_action_history(SMin),
+	do(go(0,Limit,G),S0,S),
+	pretty_print(S), nl,
 	cputime(T3), write('Time taken: '),
-	DT32 is T3 - T2, write(DT32), nl.
+	DT32 is T3 - T2, write(DT32), nl, nl.
 
 
 %%
@@ -80,17 +77,28 @@ go(Limit) :-
 %%  N is the current iteration, Limit is the maximum number of iterations,
 %%  Goal is the situation we're trying to achieve (tested with goal(Goal)).
 %%
-proc(go(N,Limit, Goal),
-	if(goal(Goal),
-		% then
-		?(println('Found one.')),
-		% else
-		if(N<Limit,
-			% then
-            do_actions : pi(i,?(i is N+1) : go(i,Limit,Goal)),
-			% else
-			fail
-		)
+proc(go(N,Limit,Goal),
+	?(N=<Limit) :
+	(
+		action_set(N) :
+		?(goal(Goal))
+		/
+		pi(n1, ?(n1 is N+1) : go(n1,Limit,Goal))
+	)
+).
+
+
+%%
+%%  action_set(N): Generates a set of actions for each agent N long.
+%%
+%%  ie. N actions for each agent.
+%%
+proc(action_set(N),
+	if(N =< 0,
+		%then
+		?(true),
+		%else
+		do_actions : pi(n1, ?(n1 is N-1) : action_set(n1))
 	)
 ).
 
@@ -107,8 +115,7 @@ proc(do_actions,
 
 proc(do_action([]), ?(true)).
 proc(do_action([Agent|List]),
-    pi(a, ?(action(a,Agent)) : a) :
-    do_action(List)
+    pi(a, ?(action(a,Agent)) : a) : do_action(List)
 ).
 
 
