@@ -1,4 +1,14 @@
 %%
+%%  utility.pl: Useful predicates for prolog and blocks world.
+%%
+%%  Author: Joshua Torrance (joshuat)
+%%  Date: 11/11/2011
+%%
+%%  A more extensive and better documented version of this file
+%%  is available in the congolog program.
+%%
+
+%%
 %%  Map Functions
 %%
 map(Function, List) :- 
@@ -19,6 +29,7 @@ map1(Function,[L|Ls],[R|Rs]) :-
    map(Function,Ls,Rs).
 map1(_,[],[]).
 
+
 %%
 %%  max(List,Max): Max is the highest value in List
 %%
@@ -28,6 +39,7 @@ max([X|Xs],X) :-
 max([X|Xs],X2) :-
     max(Xs,X2), X2 > X.
 
+	
 %%
 %%  unique_list(List): is true if every element in List is unique
 %%
@@ -36,10 +48,12 @@ unique_list([L|Ls]) :-
 	unique_list(Ls).
 unique_list([]).
 
+
 %%
 %%  head(List,Head): Head is the head of List.
 %%
 head([X|_],X).
+
 
 %%
 %%  pretty_print(S): prints the situation legibly
@@ -61,5 +75,3 @@ pretty_print(do(A, S), N) :-
 	N is M+1,
 	nl, write(N), write(': '),
 	pretty_print(A).
-	
-

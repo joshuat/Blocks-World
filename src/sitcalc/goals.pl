@@ -1,13 +1,34 @@
+%%
+%%  goals.pl: Goal definitions and utility predicates for extended blocks world.
+%%
+%%  Author: Joshua Torrance (joshuat)
+%%  Date: 11/11/2011
+%%
+%%  TODO: Finish implementing quick unstacking of types as a goal.
+%%  TODO: Remove assumptions in ideal_num_stacks.
+%%
+
+%%
+%%  goal(S): An arbitrary goal.
+%%
 goal(S) :-
     on_top(a, c, S),	 on_top(d, b, S),
 	on_top(c, floor, S), on_top(b, floor, S).
 
+	
+%%
+%%  dynamic_goal(S): A goal that can change depending on the scenario.
+%%
+%%  Arbitrary rules:
+%%  -No robot is holding blocks in goal state.
+%%  -There is a minimum number of stacks.
+%%  -The heavier blocks are towards the bottom of stacks.
+%%
 dynamic_goal(S) :-
     not(holding(_,_,S)),
     stack_list(Stacks, S),
     length(Stacks,NStacks), ideal_num_stacks(NStacks),
     heaviest_on_bottom(Stacks).
-
 
 
 %%
@@ -33,6 +54,7 @@ stack_list2([],[],_).
 stack_list2([F|Fs],[S|Ss],Sit) :-
     get_stack(F,S,Sit), stack_list2(Fs,Ss,Sit).
 
+	
 %%
 %%  get_stack(Block, Stack, S): gets the list of blocks on top of
 %%      Block in S.
@@ -88,6 +110,7 @@ ideal_num_stacks(N) :-
     max_height(H), num_blocks(B),
     N is ceiling(B / H).
 
+	
 %%
 %%  time_to_access(Type, NumActions, S): gives the number of actions
 %%      required to grab a block of Type.

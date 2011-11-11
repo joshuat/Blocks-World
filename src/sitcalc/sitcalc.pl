@@ -1,9 +1,11 @@
 %%
 %%  sitcalc.pl:  Prolog Implementation of the Situation Calculus
 %%
-%%  Author:  Ryan Kelly (rfk)
+%%  Author:  Joshua Torrance (joshuat)
+%%  Date: 11/11/2011
 %%
-%%  Date Created:  12/03/07
+%%  This file has been adapted from Ryan Kelly's implementation of the situation
+%%  calculus.
 %%
 %%  To implement a domain axiomatisation using this framework, the following
 %%  tasks must be completed:
@@ -22,6 +24,13 @@
 %%       * specify the initial conditions using fluent predicates with the
 %%         situation term set to s0.
 %%
+%%       * specify the simultaneous_actions predicates.
+%%
+%%  This implementation of the situation calculus allows one action per agent
+%%  for every do statement.
+%%
+%%  Intead of do(A,S) we have do([A,B,C,...],S).
+%%
 
 
 %%
@@ -31,6 +40,7 @@
 %%
 actor(Actn,Agt) :-
     primitive_action(Actn), arg(1,Actn,Agt).
+
 
 %%
 %%  precedes(S1,S2):  ordering over situations
@@ -42,6 +52,7 @@ precedes(_,s0) :- fail.
 precedes(S1,do(A,S2)) :-
     poss(A,S2), precedes_eq(S1,S2).
 
+
 %%
 %%  precedes_eq(S1,S2):  precedes-or-equals
 %%
@@ -50,6 +61,7 @@ precedes(S1,do(A,S2)) :-
 %%
 precedes_eq(S1,S2) :-
     S1 = S2 ; precedes(S1,S2).
+
 
 %%
 %%  poss(A,S):   possibility of executing an action

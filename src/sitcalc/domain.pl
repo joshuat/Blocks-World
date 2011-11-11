@@ -1,17 +1,15 @@
 %%
 %%  blocksdomain.pl:  Axiomatisation of the "Blocks World" domain for ConGolog
 %%
-%%  Author:  Joshua Torrance (joshuat)
+%%  Author: Joshua Torrance (joshuat)
+%%  Date:  11/11/2011
 %%
-%%  Date Created:  06/10/11
+%%  This file contains an axiomatisation of the blocks world domain
+%%  in the situation calculus. This file has been adapted from Ryan Kelly's
+%%  Cooking Agents domain.
 %%
-%%    This file will contain an axiomatisation of the "Blocks World" domain
-%%    in the situation calculus. This file has been adapted from Ryan Kelly's
-%%    Cooking Agents domain.
-%%
-%%    The domain consists of several agents and inanimate objects of
-%%    different types (indicated by prim_object/2) which in turn may
-%%    be part of super-types (indicated by super_type/2).
+%%  TODO: Move scenario specific information (entities, s0, etc.) to a
+%%			separate file.
 %%
 
 
@@ -41,6 +39,7 @@ height(robot1, 2).
 height(robot2, 2).
 height(robot3, 2).
 
+
 %%
 %%  Robots are agents.
 %%
@@ -67,6 +66,7 @@ weight(b, 1).
 weight(c, 1).
 weight(d, 1).
 
+
 %%
 %%  type(Block, Type): specify the type of each block
 %%
@@ -76,6 +76,7 @@ type(a, type1).
 type(b, type1).
 type(c, type2).
 type(d, type2).
+
 
 %%  
 %%  floor(Floor): specifies the floor
@@ -93,6 +94,9 @@ floor(floor).
 %%
 %%  The following below the "no-op" action.  As the action as no effect,
 %%  successor state axioms are not necessary.
+%%
+%%  The noop action has been removed to reduce clutter and
+%%  speed up execution times.
 %%
 %primitive_action(noop(A)) :-
 %    agent(A).
@@ -160,6 +164,7 @@ poss(put_down(Robot,Block,Place),S) :-
 poss(noop(Robot), S) :-
 	robot(Robot), \+holding(Robot,_,S).
 
+	
 %%
 %%  Simultaneous action rules.
 %%  simultaneous_action(GroupAction, S)
@@ -293,6 +298,7 @@ total_lift_strength(Block,[lift(Robot,Block)|As],Strength) :-
 total_lift_strength(Block,[A|As],Strength) :-
 	\+(A=lift(_,Block)),
 	total_lift_strength(Block,As,Strength).
+
 	
 %%
 %%  all_noop(GroupAction): all the actions are noop(_)
@@ -313,6 +319,7 @@ height(Block,Height,S) :-
 	on_top(Block,Base,S),
 	height(Base,BaseHeight,S),
 	Height is BaseHeight+1.
+
 
 %%
 %%  primary_object(Action, Object): gives the first object for the action.
